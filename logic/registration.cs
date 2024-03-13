@@ -4,10 +4,12 @@ class registration {
     private string username;
     private string password;
     private string email;
+    private bool isLogged = false;
     static void registration(string username, string password, string email) {
         this.username = username;
         this.password = password;
         this.email = email;
+        isLogged = true;
     }
 
     static void register() {
@@ -31,6 +33,15 @@ class registration {
             Console.WriteLine("Invalid username or password!");
         }
     }
+
+    static void logout() {
+        isLogged = false;
+    }
+
+    static bool LogStatus() {
+        return isLogged;
+    }
+
 
     
 }
