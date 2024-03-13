@@ -5,24 +5,34 @@ class registration {
     private string password;
     private string email;
     private bool isLogged = false;
-    static void registration(string username, string password, string email) {
+    public static void registration(string username, string password, string email) {
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
+            throw new ArgumentException("Username and password cannot be empty");
+        }
         this.username = username;
         this.password = password;
         this.email = email;
         isLogged = true;
     }
 
-    static void register() {
+    public static void register() {
         Console.WriteLine("Enter your username: ");
-        string username = Console.ReadLine();
+        string username = string.IsNullOrEmpty(Console.ReadLine()) ? throw new ArgumentException("Username cannot be empty") : username;
+
         Console.WriteLine("Enter your password: ");
-        string password = Console.ReadLine();
+        string password = string.IsNullOrEmpty(Console.ReadLine()) ? throw new ArgumentException("Password cannot be empty") : password;
+
         Console.WriteLine("Enter your email: ");
-        string email = Console.ReadLine();
+        string input = Console.ReadLine();
+        string emailPattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$";
+         if (!Regex.IsMatch(input, emailPattern)) {
+            throw new ArgumentException("Error: Invalid email!");
+            return;
+        string email = input;
         registration(username, password, email);
     }
 
-    static void login() {
+    public static void login() {
         Console.WriteLine("Enter your username: ");
         string username = Console.ReadLine();
         Console.WriteLine("Enter your password: ");
@@ -34,11 +44,11 @@ class registration {
         }
     }
 
-    static void logout() {
+    public static void logout() {
         isLogged = false;
     }
 
-    static bool LogStatus() {
+    public static bool LogStatus() {
         return isLogged;
     }
 

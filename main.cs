@@ -10,7 +10,10 @@ namespace Project
                 int choice = int.TryParse(Console.ReadLine(), out int result) ? result : ArgumentException("Error: Invalid input!");
                 switch choice {
                     case 1:
-                        registraion.register();
+                        register();
+                        if (registration.LogStatus()) {
+                            Console.WriteLine("You are logged in!");
+                        }
                         break;
                     case 2:
                         registration.login();
@@ -22,6 +25,7 @@ namespace Project
                         Console.WriteLine("Invalid choice!");
                         break;
                 }
+
             }
         }
     }
