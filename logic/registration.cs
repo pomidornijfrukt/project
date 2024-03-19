@@ -51,6 +51,7 @@ class registration {
     public static bool LogStatus() {
         return isLogged;
     }
+    }
 
 
     
