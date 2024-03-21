@@ -48,9 +48,7 @@ class registration {
         isLogged = false;
     }
 
-    public static bool LogStatus() {
-        return isLogged;
-    }
+    public static bool LogStatus() => isLogged;
     }
 
 
