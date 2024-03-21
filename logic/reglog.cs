@@ -6,8 +6,8 @@ class reglog{
 
 
     public static void register(string username, string password, string email) {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
-            throw new ArgumentException("Username and password cannot be empty");
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)) {
+            throw new ArgumentException("Username or password or email cannot be empty");
         }
         registration(username, password, email);
     }
