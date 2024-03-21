@@ -6,8 +6,8 @@ class registration {
     private string email;
     private bool isLogged = false;
     public static void registration(string username, string password, string email) {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
-            throw new ArgumentException("Username and password cannot be empty");
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)) {
+            throw new ArgumentException("Username or password or email cannot be empty");
         }
         this.username = username;
         this.password = password;
@@ -39,12 +39,16 @@ class registration {
         string password = Console.ReadLine();
         if (username == this.username && password == this.password) {
             Console.WriteLine("You are logged in!");
+            isLogged = true;
         } else {
             Console.WriteLine("Invalid username or password!");
         }
     }
 
     public static void logout() {
+
+   
+
         isLogged = false;
     }
 
