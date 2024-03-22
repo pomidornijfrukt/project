@@ -17,6 +17,11 @@ namespace Project
                         break;
                     case 2:
                         registration.login();
+
+
+        string username = 123;
+        
+
                         break;
                     case 3:
                         Environment.Exit(0);
