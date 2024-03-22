@@ -46,9 +46,6 @@ class registration {
     }
 
     public static void logout() {
-
-   
-
         isLogged = false;
     }
 
