@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-class reglog{
+class Reglog{
     private Dictionary<Tuple<string, string>, string> userlog;
 
 
