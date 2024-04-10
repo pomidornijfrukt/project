@@ -2,14 +2,10 @@ using System;
 using System.Collections.Generic;
 
 class Reglog{
-    private Dictionary<Tuple<string, string>, string> userlog;
+    protected Dictionary<Tuple<string, string>, string> userlog = new Dictionary<Tuple<string, string>, string>();
 
-
-    public static void register(string username, string password, string email) {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)) {
-            throw new ArgumentException("Username or password or email cannot be empty");
-        }
-        registration(username, password, email);
+    public Reglog(string username, string email, DateTime date){
+        userlog.Add(Tuple.Create(username, email), date.ToString());
     }
 
 }
