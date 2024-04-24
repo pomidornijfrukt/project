@@ -13,13 +13,15 @@ class UsersDB
         this.password = password;
     }
 
-    static void AddUsers(){
+    public void AddUsers(string username, string password){
         using (var connection = new SQLiteConnection("Data Source=usermanager&userlog.db"))
         {
             connection.Open();
             using (var command = new SQLiteCommand(connection))
             {
-                command.CommandText = "INSERT INTO users (username, password) VALUES ($'{username}', '{password}')";
+                command.CommandText = "INSERT INTO users (username, password) VALUES (@username, @password)";
+                command.Parameters.AddWithValue("@username", username);
+                command.Parameters.AddWithValue("@password", password);
                 command.ExecuteNonQuery();
             }
         }
@@ -58,7 +60,7 @@ class UsersDB
                     sb.Append($"{column.Key} {column.Value}, ");
                 }
 
-                // Remove the last comma and space
+                // Removes the last comma and space
                 sb.Length -= 2;
 
                 sb.Append(")");
@@ -69,34 +71,4 @@ class UsersDB
         }
     }
 
-    // string connectionString = "Data Source=usermanager&userlog.db";
-    // using (var connection = new SQLiteConnection(connectionString))
-    // {
-    //     connection.Open();
-    // using var command = new SQLiteCommand(connection);
-    // command.CommandText = "CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT)";
-    // command.CommandText = "INSERT INTO users (username, password) VALUES ('admin', 'admin')";
-    // command.ExecuteNonQuery();
-// }
-    
 }
-
-
-
-
-
-
-
-
-// string connectionString = "Data Source=usermanager&userlog.db";
-// using (var connection = new SQLiteConnection(connectionString))
-// {
-//     connection.Open();
-//     using (var command = new SQLiteCommand(connection))
-//     {
-//         command.CommandText = "CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT)";
-//         command.CommandText = "INSERT INTO users (username, password) VALUES ('admin', 'admin')";
-//         command.ExecuteNonQuery();
-//     }
-
-// }
