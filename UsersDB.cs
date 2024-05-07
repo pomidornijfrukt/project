@@ -7,6 +7,7 @@ class UsersDB
 {
     protected string username;
     protected string password;
+    protected string dataSource = "Data Source=usermanager&userlog.db";
 
     public UsersDB(string username, string password){
         this.username = username;
@@ -14,7 +15,7 @@ class UsersDB
     }
 
     public void AddUsers(string username, string password){
-        using (var connection = new SQLiteConnection("Data Source=usermanager&userlog.db"))
+        using (var connection = new SQLiteConnection(dataSource))
         {
             connection.Open();
             using (var command = new SQLiteCommand(connection))
@@ -27,8 +28,9 @@ class UsersDB
         }
     }
 
+
     public void ShowUsers(){
-        using (var connection = new SQLiteConnection("Data Source=usermanager&userlog.db"))
+        using (var connection = new SQLiteConnection(dataSource))
         {
             connection.Open();
             using (var command = new SQLiteCommand(connection))
@@ -47,7 +49,7 @@ class UsersDB
 
     public void CreateTable(string tableName, Dictionary<string, string> columns)
     {
-        using (var connection = new SQLiteConnection("Data Source=usermanager&userlog.db"))
+        using (var connection = new SQLiteConnection(dataSource))
         {
             connection.Open();
             using (var command = new SQLiteCommand(connection))

@@ -2,16 +2,26 @@
 
 namespace Project
 {
-    class Program {
-        static void Main(string[] args) {
+    class Program
+    {
+        static void Main(string[] args) 
+        {
             Registration registration = new Registration();
-            while (true){
+            bool t = true;
+            while (t)
+            {
+                if (registration.LogStatus() == true)
+                {
+                    t = false;  
+                }  
                 Console.WriteLine("Choose an option using a corresponding number:\n1. Register\n2. Login\n3. Exit");
                 int choice = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
-                switch (choice) {
+                switch (choice) 
+                {
                     case 1:
                         registration.Register();
-                        if (registration.LogStatus()) {
+                        if (registration.LogStatus())
+                        {
                             Console.WriteLine("You are logged in!");
                         }
                         break;
@@ -26,6 +36,11 @@ namespace Project
                         break;
                 }
             }
+            if (registration.LogStatus() == true)
+            {
+                Logic logic = new Logic();
+                Logic.MainLogic(); 
+            } 
         }
     }
 }

@@ -1,13 +1,15 @@
 using System;
 using System.Text.RegularExpressions;
 
-class Registration {
+class Registration
+{
     private string? username;
     private string? password;
     private string? email;
     private bool isLogged = false;
 
-    public void RegistrationMethod(string username, string password, string? email) {
+    public void RegistrationMethod(string username, string password, string? email)
+    {
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)) {
             throw new ArgumentException("Username or password or email cannot be empty");
         }
@@ -17,7 +19,8 @@ class Registration {
         isLogged = true;
     }
 
-    public void Register() {
+    public void Register() 
+    {
         Console.WriteLine("Enter your username: ");
         string username = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
         if (string.IsNullOrEmpty(username))
@@ -31,18 +34,28 @@ class Registration {
         {
             throw new ArgumentException("Password cannot be empty");
         }
+        if (password == username)
+        {
+            throw new ArgumentException("Password cannot be the same as username");
+        }
+        if (password.Length <= 10 )
+        {
+            throw new ArgumentException("Password must be longer than 10 characters");
+        } 
 
         Console.WriteLine("Enter your email: ");
         string input = Console.ReadLine() ?? throw new ArgumentException("Email cannot be empty!");
         string emailPattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$";
-        if (!Regex.IsMatch(input, emailPattern)) {
+        if (!Regex.IsMatch(input, emailPattern)) 
+        {
             throw new ArgumentException("Error: Invalid email!");
         }
         string email = input;
         RegistrationMethod(username, password, email);
     }
 
-    public void Login() {
+    public void Login()
+    {
         Console.WriteLine("Enter your username: ");
         string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
         Console.WriteLine("Enter your password: ");

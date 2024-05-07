@@ -1,2 +1,3 @@
 # project
-the java project. an incomplete parody of ss.com
+the java project Time Manager.
+More likely to name it as an TimeLog for users
