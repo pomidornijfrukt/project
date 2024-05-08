@@ -7,7 +7,6 @@ class Registration
     private string? password;
     private string? email;
     private bool isLogged = false;
-    public Registration currentUser = new();
 
 
     public void RegistrationMethod(string username, string password, string? email)
