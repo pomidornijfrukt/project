@@ -38,9 +38,9 @@ namespace Project
             }
             if (registration.LogStatus() == true)
             {
-                Logic logic = new Logic();
                 Logic.MainLogic(); 
             } 
         }
     }
+
 }

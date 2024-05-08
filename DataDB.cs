@@ -4,13 +4,13 @@ using System.Data.SQLite;
 using System.Text;
 class DataDB
 {
-    protected UsersDB usersDB;
+    protected UsersDB? usersDB;
     protected string dataSource = "Data Source=data.db";
 
-    public DataDB(UsersDB usersDB)
-    {
-        this.usersDB = usersDB;
-    }
+    // public DataDB(UsersDB usersDB)
+    // {
+    //     this.usersDB = usersDB;
+    // }
 
     public void AddData(UsersDB usersDB, DateTime startDate, DateTime endDate, string typeOfData)
     {
@@ -29,4 +29,27 @@ class DataDB
         }
     }
 
+    public void ShowData()
+    {
+        using (var connection = new SQLiteConnection(dataSource))
+        {
+            connection.Open();
+            using (var command = new SQLiteCommand(connection))
+            {
+                command.CommandText = "SELECT * FROM data";
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"User: {reader.GetString(0)}, Start date: {reader.GetDateTime(1)}, End date: {reader.GetDateTime(2)}, Type of data: {reader.GetString(3)}");
+                    }
+                }
+            }
+        }
+    }
+
+    public void AddData(DateTime startDate, DateTime endDate, string? typeOfData)
+    {
+        throw new NotImplementedException();
+    }
 }

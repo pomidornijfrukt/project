@@ -7,6 +7,8 @@ class Registration
     private string? password;
     private string? email;
     private bool isLogged = false;
+    public Registration currentUser = new();
+
 
     public void RegistrationMethod(string username, string password, string? email)
     {
@@ -22,14 +24,14 @@ class Registration
     public void Register() 
     {
         Console.WriteLine("Enter your username: ");
-        string username = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
+        string username = Console.ReadLine();
         if (string.IsNullOrEmpty(username))
         {
             throw new ArgumentException("Username cannot be empty");
         }
 
         Console.WriteLine("Enter your password: ");
-        string password = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
+        string password = Console.ReadLine();
         if (string.IsNullOrEmpty(password))
         {
             throw new ArgumentException("Password cannot be empty");
@@ -51,7 +53,8 @@ class Registration
             throw new ArgumentException("Error: Invalid email!");
         }
         string email = input;
-        RegistrationMethod(username, password, email);
+        Registration currentUser = new(); 
+        currentUser.RegistrationMethod(username, password, email);
     }
 
     public void Login()

@@ -14,7 +14,7 @@ class UsersDB
         this.password = password;
     }
 
-    public void AddUsers(string username, string password){
+    public void AddUser(string username, string password){
         using (var connection = new SQLiteConnection(dataSource))
         {
             connection.Open();
@@ -73,4 +73,8 @@ class UsersDB
         }
     }
 
+    internal void AddData(DateTime startDate, DateTime endDate, string typeOfData)
+    {
+        throw new NotImplementedException();
+    }
 }
