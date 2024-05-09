@@ -48,7 +48,7 @@ namespace Project
                     Console.WriteLine($"An error occurred: {ex.Message}");
                 }
             }
-            if (registration.LogStatus())
+            if (registration.isLogged)
             {
                 Logic.MainLogic(); 
             } 

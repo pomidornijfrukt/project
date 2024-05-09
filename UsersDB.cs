@@ -1,20 +1,23 @@
 using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Security.Cryptography;
 using System.Text;
+
 namespace Project
 {
-    class UsersDB
+    public class UsersDB
     {
-        protected string username;
-        protected string password;
-        protected string dataSource = "Data Source=usermanager&userlog.db";
-        private static UsersDB? ActiveUser { get; set; }
+        private static UsersDB? ActiveUser;
+        private string username;
+        private string password;
+        private string salt;
+        private string dataSource = "Data Source=usermanager&userlog.db;";
 
         public UsersDB(string username, string password)
         {
             this.username = username;
-            this.password = password;
+            this.salt = GenerateSalt();
+            this.password = HashPassword(password, this.salt);
         }
 
         public static void SetActiveUser(UsersDB user)
@@ -34,22 +37,25 @@ namespace Project
 
         public void AddUser(string username, string password)
         {
+            string salt = GenerateSalt();
+            string hashedPassword = HashPassword(password, salt);
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = "INSERT INTO users (username, password) VALUES (@username, @password)";
+                    command.CommandText = "INSERT INTO users (username, password, salt) VALUES (@username, @password, @salt)";
                     command.Parameters.AddWithValue("@username", username);
-                    command.Parameters.AddWithValue("@password", password);
+                    command.Parameters.AddWithValue("@password", hashedPassword);
+                    command.Parameters.AddWithValue("@salt", salt);
                     command.ExecuteNonQuery();
                 }
             }
-        
-        UsersDB newUser = new UsersDB(username, password);
-        SetActiveUser(newUser);
-        }
 
+            UsersDB newUser = new UsersDB(username, hashedPassword);
+            SetActiveUser(newUser);
+        }
 
         public void ShowUsers()
         {
@@ -63,36 +69,34 @@ namespace Project
                     {
                         while (reader.Read())
                         {
-                            Console.WriteLine($"Username: {reader.GetString(0)}, Password: {reader.GetString(1)}");
+                            Console.WriteLine($"Username: {reader.GetString(0)}, Password: {reader.GetString(1)}, Salt: {reader.GetString(2)}");
                         }
                     }
                 }
             }
         }
 
-        public void CreateTable(string tableName, Dictionary<string, string> columns)
+        private string HashPassword(string password, string salt)
         {
-            using (var connection = new SQLiteConnection(dataSource))
+            using (SHA256 sha256Hash = SHA256.Create())
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password + salt));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append($"CREATE TABLE IF NOT EXISTS {tableName} (");
-
-                    foreach (var column in columns)
-                    {
-                        sb.Append($"{column.Key} {column.Value}, ");
-                    }
-
-                    // Removes the last comma and space
-                    sb.Length -= 2;
-
-                    sb.Append(")");
-
-                    command.CommandText = sb.ToString();
-                    command.ExecuteNonQuery();
+                    builder.Append(bytes[i].ToString("x2"));
                 }
+                return builder.ToString();
+            }
+        }
+
+        private string GenerateSalt()
+        {
+            byte[] bytes = new byte[128 / 8];
+            using (var keyGenerator = RandomNumberGenerator.Create())
+            {
+                keyGenerator.GetBytes(bytes);
+                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
             }
         }
     }

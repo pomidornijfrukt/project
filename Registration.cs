@@ -6,12 +6,13 @@ class Registration
     private string? username;
     private string? password;
     private string? email;
-    private bool isLogged = false;
+    public bool isLogged = false;
 
 
     public void RegistrationMethod(string username, string password, string? email)
     {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email)) {
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email))
+        {
             throw new ArgumentException("Username or password or email cannot be empty");
         }
         this.username = username  ?? throw new ArgumentException("Username cannot be empty!");
@@ -20,7 +21,7 @@ class Registration
         isLogged = true;
     }
 
-    public void Register() 
+    public void Register()
     {
         Console.WriteLine("Enter your username: ");
         string username = Console.ReadLine();
@@ -62,15 +63,19 @@ class Registration
         string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
         Console.WriteLine("Enter your password: ");
         string inputPassword = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
-        if (inputUsername == this.username && inputPassword == this.password) {
+        if (inputUsername == this.username && inputPassword == this.password)
+        {
             Console.WriteLine("You are logged in!");
             isLogged = true;
-        } else {
+        }
+        else
+        {
             Console.WriteLine("Invalid username or password!");
         }
     }
 
-    public void Logout() {
+    public void Logout()
+    {
         isLogged = false;
     }
 

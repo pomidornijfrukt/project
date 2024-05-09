@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS data (
+    username TEXT,
+    timestamp TEXT
+);
