@@ -4,46 +4,89 @@ using System.Data.SQLite;
 using System.Text;
 namespace Project
 {
-    class DataDB
+    public class DataDB
     {
         protected UsersDB? usersDB;
         protected string dataSource = "Data Source=/workspaces/project/data.db";
 
-        // public DataDB(UsersDB usersDB)
-        // {
-        //     this.usersDB = usersDB;
-        // }
-
-        public void AddData(UsersDB usersDB, DateTime startDate, DateTime endDate, string typeOfData)
+        public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns)
         {
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = "INSERT INTO data (user, startDate, endDate, typeOfData) VALUES (@user, @startDate, @endDate, @typeOfData)";
-                    command.Parameters.AddWithValue("@user", usersDB);
-                    command.Parameters.AddWithValue("@startDate", startDate);
-                    command.Parameters.AddWithValue("@endDate", endDate);
-                    command.Parameters.AddWithValue("@typeOfData", typeOfData);
+                    StringBuilder columnDefinitions = new StringBuilder();
+
+                    foreach (var pair in columns)
+                    {
+                        columnDefinitions.Append($"{pair.Key} {pair.Value}, ");
+                    }
+
+                    // Remove the last comma and space
+                    columnDefinitions.Length -= 2;
+
+                    command.CommandText = $"CREATE TABLE IF NOT EXISTS {tableName} ({columnDefinitions})";
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public void ShowData()
+        public void AddData(string tableName, Dictionary<string, object> data)
+        {
+            // Creating table if it doesn't exist
+            var columns = new Dictionary<string, string>();
+            foreach (var pair in data)
+            {
+                columns[pair.Key] = "TEXT NOT NULL";
+            }
+            CreateDatabaseTable(tableName, columns);
+
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    StringBuilder columnsBuilder = new StringBuilder();
+                    StringBuilder valuesBuilder = new StringBuilder();
+
+                    foreach (var pair in data)
+                    {
+                        columnsBuilder.Append(pair.Key + ",");
+                        valuesBuilder.Append("@" + pair.Key + ",");
+                        command.Parameters.AddWithValue("@" + pair.Key, pair.Value);
+                    }
+
+                    // Remove the trailing commas
+                    columnsBuilder.Length--;
+                    valuesBuilder.Length--;
+
+                    command.CommandText = $"INSERT INTO {tableName} ({columnsBuilder}) VALUES ({valuesBuilder})";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void ShowData(string tableName, List<string> columnNames)
         {
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = "SELECT * FROM data";
+                    command.CommandText = $"SELECT * FROM {tableName}";
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Console.WriteLine($"User: {reader.GetString(0)}, Start date: {reader.GetDateTime(1)}, End date: {reader.GetDateTime(2)}, Type of data: {reader.GetString(3)}");
+                            StringBuilder output = new StringBuilder();
+                            for (int i = 0; i < columnNames.Count; i++)
+                            {
+                                output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
+                            }
+                            // Remove the last comma and space
+                            output.Length -= 2;
+                            Console.WriteLine(output);
                         }
                     }
                 }

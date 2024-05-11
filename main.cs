@@ -6,7 +6,9 @@ namespace Project
     {
         static void Main(string[] args) 
         {
-            Registration registration = new Registration();
+            DataDB dataDB = new DataDB();
+            UsersDB usersDB = new UsersDB(dataDB);
+            Registration registration = new Registration(usersDB);  
             bool t = true;
             while (t)
             {
@@ -14,12 +16,12 @@ namespace Project
                 {
                     t = false; 
                     break;
-                }  
+                }
                 Console.WriteLine("Choose an option using a corresponding number:\n1. Register\n2. Login\n3. Exit");
                 try
                 {
-                    int choice = int.Parse(Console.ReadLine());
-                    switch (choice) 
+                    int choice = int.Parse(Console.ReadLine()?? throw new ArgumentException("Choice cannot be empty!"));
+                    switch (choice)
                     {
                         case 1:
                             registration.Register();
@@ -47,11 +49,11 @@ namespace Project
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
                 }
+                if (registration.isLogged)
+                {   
+                    Logic.MainLogic(); 
+                }   
             }
-            if (registration.isLogged)
-            {
-                Logic.MainLogic(); 
-            } 
         }
     }
 }

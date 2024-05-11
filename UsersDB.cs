@@ -11,13 +11,20 @@ namespace Project
         private string username;
         private string password;
         private string salt;
-        private string dataSource = "Data Source=usermanager&userlog.db;";
+        private string dataSource = "Data Source=usermanager21.db;";
+        private DataDB dataDB;
 
-        public UsersDB(string username, string password)
+        public UsersDB(DataDB dataDB)
+        {
+            this.dataDB = dataDB;
+        }
+
+        public UsersDB(string username, string password, DataDB dataDB)
         {
             this.username = username;
             this.salt = GenerateSalt();
             this.password = HashPassword(password, this.salt);
+            this.dataDB = dataDB;
         }
 
         public static void SetActiveUser(UsersDB user)
@@ -30,30 +37,34 @@ namespace Project
             return ActiveUser;
         }
 
-        public string GetUsername()
-        {
-            return username;
-        }
+        public string GetUsername() => username;
 
         public void AddUser(string username, string password)
         {
             string salt = GenerateSalt();
             string hashedPassword = HashPassword(password, salt);
 
-            using (var connection = new SQLiteConnection(dataSource))
+            // Creating table if it doesn't exist
+            var columns = new Dictionary<string, string>
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
-                {
-                    command.CommandText = "INSERT INTO users (username, password, salt) VALUES (@username, @password, @salt)";
-                    command.Parameters.AddWithValue("@username", username);
-                    command.Parameters.AddWithValue("@password", hashedPassword);
-                    command.Parameters.AddWithValue("@salt", salt);
-                    command.ExecuteNonQuery();
-                }
-            }
+                { "username", "TEXT" },
+                { "password", "TEXT" },
+                { "salt", "TEXT" },
+                { "creationTime", "TEXT" }
+            };
+            dataDB.CreateDatabaseTable("users", columns);
 
-            UsersDB newUser = new UsersDB(username, hashedPassword);
+            // Adding user data
+            var data = new Dictionary<string, object>
+            {
+                { "username", username },
+                { "password", hashedPassword },
+                { "salt", salt },
+                { "creationTime", DateTime.Now.ToString() }
+            };
+            dataDB.AddData("users", data);
+
+            UsersDB newUser = new(username, hashedPassword, this.dataDB);
             SetActiveUser(newUser);
         }
 
@@ -98,6 +109,34 @@ namespace Project
                 keyGenerator.GetBytes(bytes);
                 return BitConverter.ToString(bytes).Replace("-", "").ToLower();
             }
+        }
+
+        public bool ValidateUser(string username, string password)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = "SELECT password, salt FROM users WHERE username = @username";
+                    command.Parameters.AddWithValue("@username", username);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            string storedPassword = reader.GetString(0);
+                            string storedSalt = reader.GetString(1);
+                            string hashedInputPassword = HashPassword(password, storedSalt);
+
+                            if (storedPassword == hashedInputPassword)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 }

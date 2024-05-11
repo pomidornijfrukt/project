@@ -1,83 +1,76 @@
 using System;
 using System.Text.RegularExpressions;
-
-class Registration
+namespace Project
 {
-    private string? username;
-    private string? password;
-    private string? email;
-    public bool isLogged = false;
-
-
-    public void RegistrationMethod(string username, string password, string? email)
+    class Registration
     {
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email))
-        {
-            throw new ArgumentException("Username or password or email cannot be empty");
-        }
-        this.username = username  ?? throw new ArgumentException("Username cannot be empty!");
-        this.password = password  ?? throw new ArgumentException("Password cannot be empty!");
-        this.email = email  ?? throw new ArgumentException("Email cannot be empty!");
-        isLogged = true;
-    }
+        private UsersDB usersDB; // Added this line
+        public bool isLogged = false;
 
-    public void Register()
-    {
-        Console.WriteLine("Enter your username: ");
-        string username = Console.ReadLine();
-        if (string.IsNullOrEmpty(username))
+        public Registration(UsersDB usersDB) // Added this line
         {
-            throw new ArgumentException("Username cannot be empty");
+            this.usersDB = usersDB; // Added this line
         }
 
-        Console.WriteLine("Enter your password: ");
-        string password = Console.ReadLine();
-        if (string.IsNullOrEmpty(password))
+        public void Register()
         {
-            throw new ArgumentException("Password cannot be empty");
-        }
-        if (password == username)
-        {
-            throw new ArgumentException("Password cannot be the same as username");
-        }
-        if (password.Length <= 10 )
-        {
-            throw new ArgumentException("Password must be longer than 10 characters");
-        } 
+            Console.WriteLine("Enter your username: ");
+            string username = Console.ReadLine();
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException("Username cannot be empty");
+            }
 
-        Console.WriteLine("Enter your email: ");
-        string input = Console.ReadLine() ?? throw new ArgumentException("Email cannot be empty!");
-        string emailPattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$";
-        if (!Regex.IsMatch(input, emailPattern)) 
-        {
-            throw new ArgumentException("Error: Invalid email!");
-        }
-        string email = input;
-        Registration currentUser = new(); 
-        currentUser.RegistrationMethod(username, password, email);
-    }
+            Console.WriteLine("Enter your password: ");
+            string password = Console.ReadLine();
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Password cannot be empty");
+            }
+            if (password == username)
+            {
+                throw new ArgumentException("Password cannot be the same as username");
+            }
+            if (password.Length <= 6 )
+            {
+                throw new ArgumentException("Password must be longer than 6 characters");
+            } 
 
-    public void Login()
-    {
-        Console.WriteLine("Enter your username: ");
-        string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
-        Console.WriteLine("Enter your password: ");
-        string inputPassword = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
-        if (inputUsername == this.username && inputPassword == this.password)
-        {
-            Console.WriteLine("You are logged in!");
+            Console.WriteLine("Enter your email: ");
+            string input = Console.ReadLine() ?? throw new ArgumentException("Email cannot be empty!");
+            string emailPattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$";
+            if (!Regex.IsMatch(input, emailPattern)) 
+            {
+                throw new ArgumentException("Error: Invalid email!");
+            }
+            string email = input;
+
+            usersDB.AddUser(username, password); // Added this line
             isLogged = true;
         }
-        else
+
+        public void Login()
         {
-            Console.WriteLine("Invalid username or password!");
+            Console.WriteLine("Enter your username: ");
+            string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
+            Console.WriteLine("Enter your password: ");
+            string inputPassword = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
+            if (usersDB.ValidateUser(inputUsername, inputPassword))
+            {
+                Console.WriteLine("You are logged in!");
+                isLogged = true;
+            }
+            else
+            {
+                Console.WriteLine("Invalid username or password!");
+            }
         }
-    }
 
-    public void Logout()
-    {
-        isLogged = false;
-    }
+        public void Logout()
+        {
+            isLogged = false;
+        }
 
-    public bool LogStatus() => isLogged;
+        public bool LogStatus() => isLogged;
+    }
 }

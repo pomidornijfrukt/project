@@ -24,7 +24,8 @@ class Logic
                         break;
                     case 2:
                         DataDB dataDB = new DataDB();
-                        dataDB.ShowData();
+                        var columns = new List<string> { "startDate", "endDate", "typeOfData", "username"};
+                        dataDB.ShowData("data", columns);
                         break;
                     case 3:
                         t = false;
@@ -70,7 +71,14 @@ class Logic
                             MainLogic();
                         }
                         DataDB MainData = new();
-                        MainData.AddData(activeUser, startDate, endDate, typeOfData);
+                        var data = new Dictionary<string, object>
+                        {
+                            { "startDate", startDate },
+                            { "endDate", endDate },
+                            { "typeOfData", typeOfData },
+                            { "username", activeUser.GetUsername() }
+                        };
+                        MainData.AddData("data", data);
                     }
                     catch (FormatException)
                     {
