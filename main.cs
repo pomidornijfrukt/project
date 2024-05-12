@@ -7,6 +7,10 @@ namespace Project
     {
         static void Main(string[] args) 
         {
+            RMain();
+        }
+        public static void RMain()
+        {
             DataDB dataDB = new DataDB();
             UsersDB usersDB = new UsersDB(dataDB);
             Registration registration = new Registration(usersDB);  
@@ -30,6 +34,10 @@ namespace Project
                             {
                                 Console.WriteLine("You are logged in!");
                             }
+                            if (registration.isLogged)
+                            {   
+                                Logic.MainLogic(); 
+                            }
                             break;
                         case 2:
                             registration.Login();
@@ -49,11 +57,7 @@ namespace Project
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
-                }
-                if (registration.isLogged)
-                {   
-                    Logic.MainLogic(); 
-                }   
+                } 
             }
         }
     }   

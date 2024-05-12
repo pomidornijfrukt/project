@@ -92,6 +92,29 @@ namespace Project
                 }
             }
         }
-
+        public void UpdateData(string tableName, int id, string name, DateTime data)
+        {
+            // Creating table if it doesn't exist
+            var columns = new Dictionary<string, string>
+            {
+                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                { "Name", "TEXT NOT NULL" },
+                { "Data", "TEXT NOT NULL" }
+            };
+            CreateDatabaseTable(tableName, columns);
+            
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = $"UPDATE {tableName} SET Name = @Name, Data = @Data WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@Data", data);
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }
