@@ -92,25 +92,34 @@ namespace Project
                 }
             }
         }
-        public void UpdateData(string tableName, int id, string name, DateTime data)
+        public void UpdateData(string tableName, int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
         {
             // Creating table if it doesn't exist
             var columns = new Dictionary<string, string>
             {
                 { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
-                { "Name", "TEXT NOT NULL" },
-                { "Data", "TEXT NOT NULL" }
+                { "Username", "TEXT NOT NULL" },
+                { "TypeOfData", "TEXT NOT NULL" },
+                { "StartDate", "TEXT NOT NULL" },
+                { "EndDate", "TEXT NOT NULL" }
             };
             CreateDatabaseTable(tableName, columns);
-            
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+                {
+                    Console.WriteLine("Problem with code logic, relogin please.");
+                    Logic.MainLogic();
+                }
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"UPDATE {tableName} SET Name = @Name, Data = @Data WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Name", name);
-                    command.Parameters.AddWithValue("@Data", data);
+                    command.CommandText = $"UPDATE {tableName} SET username = @Username, typeOfData = @TypeOfData, startDate = @StartDate, endDate = @EndDate WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.Parameters.AddWithValue("@TypeOfData", typeOfData);
+                    command.Parameters.AddWithValue("@StartDate", startDate);
+                    command.Parameters.AddWithValue("@EndDate", endDate);
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
                 }

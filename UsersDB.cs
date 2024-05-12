@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Project
         private string salt;
         private string dataSource = "Data Source=/workspaces/project/usermanager.db;";
         private DataDB dataDB;
-
+        
         public UsersDB(DataDB dataDB)
         {
             this.dataDB = dataDB;
@@ -47,6 +48,7 @@ namespace Project
             // Creating table if it doesn't exist
             var columns = new Dictionary<string, string>
             {
+                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
                 { "username", "TEXT" },
                 { "password", "TEXT" },
                 { "salt", "TEXT" },
