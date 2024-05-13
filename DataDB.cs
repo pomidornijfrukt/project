@@ -82,14 +82,23 @@ namespace Project
                 }
             }
         }
+
         public void ShowData(string tableName, List<string> columnNames)
         {
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+            {
+                Console.WriteLine("No active user.");
+                return;
+            }
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"SELECT * FROM {tableName}";
+                    command.CommandText = $"SELECT * FROM {tableName} WHERE username = @Username";
+                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -97,7 +106,113 @@ namespace Project
                             StringBuilder output = new StringBuilder();
                             for (int i = 0; i < columnNames.Count; i++)
                             {
-                                output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
+                                if (columnNames[i] != "username")
+                                {
+                                    output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
+                                }
+                            }
+                            // Remove the last comma and space
+                            output.Length -= 2;
+                            Console.WriteLine(output);
+                        }
+                    }
+                }
+            }  
+        }
+
+        public void ShowDataWithinTimePeriod(List<string> columnNames)
+        {
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+            {
+                Console.WriteLine("Programs logic has crashed a bit, relogin to make it working");
+                Program.RMain();
+            }
+
+            TimeSpan totalSpan = TimeSpan.Zero;
+            bool firstInput = true;
+            while (true)
+            {
+                Console.WriteLine("Enter how long ago to see. 1.Month 2.Weeks 3.Days 4.Hours" + (firstInput ? "" : " 5.Continue"));
+                int timeUnit = Convert.ToInt32(Console.ReadLine());
+                if (timeUnit == 5 && !firstInput)
+                {
+                    break;
+                }
+                Console.WriteLine("Enter the amount of time units.");
+                int amount = Convert.ToInt32(Console.ReadLine());
+
+                TimeSpan timeSpan;
+                switch (timeUnit)
+                {
+                    case 1:
+                        timeSpan = TimeSpan.FromDays(amount * 30); // Approximate a month as 30 days
+                        break;
+                    case 2:
+                        timeSpan = TimeSpan.FromDays(amount * 7); // A week is 7 days
+                        break;
+                    case 3:
+                        timeSpan = TimeSpan.FromDays(amount);
+                        break;
+                    case 4:
+                        timeSpan = TimeSpan.FromHours(amount);
+                        break;
+                    default:
+                        Console.WriteLine("Invalid time unit.");
+                        return;
+                }
+                totalSpan += timeSpan;
+                firstInput = false;
+            }
+
+            DateTime cutoff = DateTime.Now - totalSpan;
+
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string tableName = reader.GetString(0);
+                            ShowDataFromTableWithinTimePeriod(tableName, columnNames, activeUser.GetUsername(), cutoff);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ShowDataFromTableWithinTimePeriod(string tableName, List<string> columnNames, string username, DateTime cutoff)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = $"SELECT * FROM {tableName} WHERE username = @Username AND endDate >= @Cutoff";
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Cutoff", cutoff);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            StringBuilder output = new StringBuilder();
+                            for (int i = 0; i < columnNames.Count; i++)
+                            {
+                                if (columnNames[i] != "username")
+                                {
+                                    if (columnNames[i] == "endDate" && Convert.ToDateTime(reader.GetValue(i)) < cutoff)
+                                    {
+                                        output.Append($"{columnNames[i]}: {cutoff}, ");
+                                    }
+                                    else
+                                    {
+                                        output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
+                                    }
+                                }
                             }
                             // Remove the last comma and space
                             output.Length -= 2;
@@ -107,6 +222,7 @@ namespace Project
                 }
             }
         }
+
         public void UpdateData(int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
         {
             // Creating table if it doesn't exist
