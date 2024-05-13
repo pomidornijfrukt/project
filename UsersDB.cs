@@ -54,7 +54,7 @@ namespace Project
                 { "salt", "TEXT" },
                 { "creationTime", "TEXT" }
             };
-            dataDB.CreateDatabaseTable("users", columns);
+            dataDB.CreateDatabaseTable("users", columns, dataSource);
 
             // Adding user data
             var data = new Dictionary<string, object>

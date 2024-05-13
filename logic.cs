@@ -118,18 +118,20 @@ namespace Project
             Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
 
+            var activeUser = UsersDB.GetActiveUser();
+
             switch (choice)
             {
                 case 1:
                     Console.WriteLine("Enter the new start date(MM/dd/yyyy HH:mm): ");
                     DateTime newStartDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("Start date time cannot be empty!"));
-                    dataDB.UpdateData("data", id, "startDate", newStartDate);
+                    dataDB.UpdateDataWithStartDate(id, activeUser.GetUsername(), "startDate", newStartDate);
                     Console.WriteLine("Start date updated successfully!");
                     break;
                 case 2:
                     Console.WriteLine("Enter the new end date(MM/dd/yyyy HH:mm): ");
                     DateTime newEndDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("End date time cannot be empty!"));
-                    dataDB.UpdateData("data", id, "endDate", newEndDate);
+                    dataDB.UpdateDataWithEndDate(id, activeUser.GetUsername(), "endDate", newEndDate);
                     Console.WriteLine("End date updated successfully!");
                     break;
                 case 3:

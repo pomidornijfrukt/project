@@ -32,16 +32,32 @@ namespace Project
             }
         }
 
+        public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns, string dataSource)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    StringBuilder columnDefinitions = new StringBuilder();
+
+                    foreach (var pair in columns)
+                    {
+                        columnDefinitions.Append($"{pair.Key} {pair.Value}, ");
+                    }
+
+                    // Remove the last comma and space
+                    columnDefinitions.Length -= 2;
+
+                    command.CommandText = $"CREATE TABLE IF NOT EXISTS {tableName} ({columnDefinitions})";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
         public void AddData(string tableName, Dictionary<string, object> data)
         {
-            // Creating table if it doesn't exist
-            var columns = new Dictionary<string, string>();
-            foreach (var pair in data)
-            {
-                columns[pair.Key] = "TEXT NOT NULL";
-            }
-            CreateDatabaseTable(tableName, columns);
-
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -66,7 +82,6 @@ namespace Project
                 }
             }
         }
-
         public void ShowData(string tableName, List<string> columnNames)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -92,18 +107,17 @@ namespace Project
                 }
             }
         }
-        public void UpdateData(string tableName, int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
+        public void UpdateData(int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
         {
             // Creating table if it doesn't exist
             var columns = new Dictionary<string, string>
             {
                 { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
                 { "Username", "TEXT NOT NULL" },
-                { "TypeOfData", "TEXT NOT NULL" },
                 { "StartDate", "TEXT NOT NULL" },
                 { "EndDate", "TEXT NOT NULL" }
             };
-            CreateDatabaseTable(tableName, columns);
+            CreateDatabaseTable(typeOfData, columns);
             var activeUser = UsersDB.GetActiveUser();
             if (activeUser == null)
                 {
@@ -115,10 +129,71 @@ namespace Project
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"UPDATE {tableName} SET username = @Username, typeOfData = @TypeOfData, startDate = @StartDate, endDate = @EndDate WHERE Id = @Id";
+                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate, endDate = @EndDate WHERE Id = @Id";
                     command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
-                    command.Parameters.AddWithValue("@TypeOfData", typeOfData);
                     command.Parameters.AddWithValue("@StartDate", startDate);
+                    command.Parameters.AddWithValue("@EndDate", endDate);
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void UpdateDataWithStartDate(int id, string username, string typeOfData, DateTime startDate)
+        {
+            // Creating table if it doesn't exist
+            var columns = new Dictionary<string, string>
+            {
+                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                { "Username", "TEXT NOT NULL" },
+                { "StartDate", "TEXT NOT NULL" },
+                { "EndDate", "TEXT NOT NULL" }
+            };
+            CreateDatabaseTable(typeOfData, columns);
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+                {
+                    Console.WriteLine("Problem with code logic, relogin please.");
+                    Logic.MainLogic();
+                }
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.Parameters.AddWithValue("@StartDate", startDate);
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void UpdateDataWithEndDate(int id, string username, string typeOfData, DateTime endDate)
+        {
+            // Creating table if it doesn't exist
+            var columns = new Dictionary<string, string>
+            {
+                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                { "Username", "TEXT NOT NULL" },
+                { "StartDate", "TEXT NOT NULL" },
+                { "EndDate", "TEXT NOT NULL" }
+            };
+            CreateDatabaseTable(typeOfData, columns);
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+                {
+                    Console.WriteLine("Problem with code logic, relogin please.");
+                    Logic.MainLogic();
+                }
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, endDate = @EndDate WHERE Id = @Id";
+                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
                     command.Parameters.AddWithValue("@EndDate", endDate);
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
