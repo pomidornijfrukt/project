@@ -53,6 +53,10 @@ namespace Project
         {
             Console.WriteLine("Enter your username: ");
             string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
+            if (!usersDB.ValidateUserUsername(inputUsername))
+            {
+                throw new ArgumentException("Invalid username!");
+            }
             Console.WriteLine("Enter your password: ");
             string inputPassword = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
             if (usersDB.ValidateUser(inputUsername, inputPassword))

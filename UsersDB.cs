@@ -42,7 +42,6 @@ namespace Project
 
         public void AddUser(string username, string password)
         {
-            // EnsureDatabaseExists(dataSource);
             string salt = GenerateSalt();
             string hashedPassword = HashPassword(password, salt);
 
@@ -73,7 +72,6 @@ namespace Project
 
         public void ShowUsers()
         {
-            // EnsureDatabaseExists(dataSource);
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -118,7 +116,6 @@ namespace Project
 
         public bool ValidateUser(string username, string password)
         {
-            // EnsureDatabaseExists(dataSource);
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -145,12 +142,25 @@ namespace Project
             return false;
         }
 
-        // private void EnsureDatabaseExists(string databasePath)
-        // {
-        //     if (!File.Exists(databasePath))
-        //     {
-        //         SQLiteConnection.CreateFile(databasePath);
-        //     }
-        // }
+        public bool ValidateUserUsername(string username)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = "SELECT username FROM users WHERE username = @username";
+                    command.Parameters.AddWithValue("@username", username);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
     }
 }
