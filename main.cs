@@ -41,6 +41,10 @@ namespace Project
                             break;
                         case 2:
                             registration.Login();
+                            if (registration.isLogged)
+                            {   
+                                Logic.MainLogic(); 
+                            }
                             break;
                         case 3:
                             Environment.Exit(0);

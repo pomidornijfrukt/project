@@ -133,6 +133,7 @@ namespace Project
 
                             if (storedPassword == hashedInputPassword)
                             {
+                                SetActiveUser(new UsersDB(username, storedPassword, dataDB));
                                 return true;
                             }
                         }

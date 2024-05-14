@@ -25,7 +25,13 @@ namespace Project
                         case 2:
                             DataDB dataDB = new DataDB();
                             var columns = new List<string> { "startDate", "endDate", "typeOfData", "username"};
-                            dataDB.ShowData("data", columns);
+                            var activeUser = UsersDB.GetActiveUser();
+                            if (activeUser == null)
+                            {
+                                Console.WriteLine("Problem with code logic, relogin please.");
+                                MainLogic();
+                            }
+                            dataDB.ShowData(activeUser.GetUsername());
                             break;
                         case 3:
                             Logic logic = new Logic();
@@ -74,15 +80,15 @@ namespace Project
                                 Console.WriteLine("Problem with code logic, relogin please.");
                                 MainLogic();
                             }
+
                             DataDB MainData = new();
                             var data = new Dictionary<string, object>
                             {
-                                { "startDate", startDate },
-                                { "endDate", endDate },
-                                { "typeOfData", typeOfData },
-                                { "username", activeUser.GetUsername() }
+                                { "Username", activeUser.GetUsername() },
+                                { "StartDate", startDate },
+                                { "EndDate", endDate }
                             };
-                            MainData.AddData("data", data);
+                            MainData.AddData(typeOfData, data);
                         }
                         catch (FormatException)
                         {
@@ -110,15 +116,19 @@ namespace Project
         {
             DataDB dataDB = new DataDB();
             var columns = new List<string> { "startDate", "endDate", "typeOfData", "username" };
-            dataDB.ShowData("data", columns);
+            var activeUser = UsersDB.GetActiveUser();
+            if (activeUser == null)
+            {
+                Console.WriteLine("Problem with code logic, relogin please.");
+                MainLogic();
+            }
+            dataDB.ShowData(activeUser.GetUsername());
 
             Console.WriteLine("Enter the ID of the data you want to edit: ");
             int id = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
 
             Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
-
-            var activeUser = UsersDB.GetActiveUser();
 
             switch (choice)
             {
@@ -149,21 +159,37 @@ namespace Project
             bool t = true;
             while(t)
             {
-                Console.WriteLine("Choose an option using a corresponding number:\n1. Add data\n3. Go Back");
+                Console.WriteLine("Choose an option using a corresponding number:\n1. Add data\n2. Go Back");
                 try
                 {
                     int choice = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
                     switch (choice)
                     {
                         case 1:
-                            Logic logic = new();
-                            logic.AddData();
+                            DateTime startDate = DateTime.Now;
+                            Console.WriteLine("The timer has started. Press any key to stop the timer.");
+                            Console.ReadKey();
+                            DateTime endDate = DateTime.Now;
+                            Console.WriteLine("Enter the type of data: ");
+                            string typeOfData = Console.ReadLine()?? throw new ArgumentException("Type of data cannot be empty!");
+                            
+                            var activeUser = UsersDB.GetActiveUser();
+                            if (activeUser == null)
+                            {
+                                Console.WriteLine("Problem with code logic, relogin please.");
+                                MainLogic();
+                            }
+                            DataDB MainData = new();
+                            var data = new Dictionary<string, object>
+                            {
+                                { "startDate", startDate },
+                                { "endDate", endDate },
+                                { "username", activeUser.GetUsername() }
+                            };
+                            MainData.AddData(typeOfData, data);
+
                             break;
-                        // case 2:
-                        //     DataDB dataDB = new DataDB();
-                        //     dataDB.ShowData();
-                        //     break;
-                        case 3:
+                        case 2:
                             MainLogic();
                             break;
                         default:

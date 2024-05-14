@@ -45,7 +45,7 @@ namespace Project
             }
             string email = input;
 
-            usersDB.AddUser(username, password); // Added this line
+            usersDB.AddUser(username, password);
             isLogged = true;
         }
 
@@ -63,11 +63,13 @@ namespace Project
             {
                 Console.WriteLine("You are logged in!");
                 isLogged = true;
+                // usersDB.SetActiveUser(newUser);
             }
             else
             {
                 Console.WriteLine("Invalid username or password!");
             }
+
         }
 
         public void Logout()

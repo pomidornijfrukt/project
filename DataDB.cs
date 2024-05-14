@@ -77,13 +77,23 @@ namespace Project
                     columnsBuilder.Length--;
                     valuesBuilder.Length--;
 
+                    // Creating table if it doesn't exist
+                    var columns = new Dictionary<string, string>
+                    {
+                        { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                        { "Username", "TEXT NOT NULL" },
+                        { "StartDate", "TEXT NOT NULL" },
+                        { "EndDate", "TEXT NOT NULL" }
+                    };
+                    CreateDatabaseTable(tableName, columns);
+
                     command.CommandText = $"INSERT INTO {tableName} ({columnsBuilder}) VALUES ({valuesBuilder})";
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public void AddData(string tableName, Dictionary<string, object> data, string dataSource)
+        public void AddData(string tablename, Dictionary<string, object> data, string dataSource)
         {
             using (var connection = new SQLiteConnection(dataSource))
             {
@@ -104,47 +114,83 @@ namespace Project
                     columnsBuilder.Length--;
                     valuesBuilder.Length--;
 
-                    command.CommandText = $"INSERT INTO {tableName} ({columnsBuilder}) VALUES ({valuesBuilder})";
+                    // Creating table if it doesn't exist
+                    var columns = new Dictionary<string, string>
+                    {
+                        { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                        { "Username", "TEXT NOT NULL" },
+                        { "StartDate", "TEXT NOT NULL" },
+                        { "EndDate", "TEXT NOT NULL" }
+                    };
+                    CreateDatabaseTable(tablename, columns);
+
+                    // Adding data to the table
+                    command.CommandText = $"INSERT INTO {tablename} ({columnsBuilder}) VALUES ({valuesBuilder})";
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public void ShowData(string tableName, List<string> columnNames)
+        public void ShowData(string username)
         {
-            var activeUser = UsersDB.GetActiveUser();
-            if (activeUser == null)
-            {
-                Console.WriteLine("No active user.");
-                return;
-            }
-
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"SELECT * FROM {tableName} WHERE username = @Username";
-                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string tableName = reader.GetString(0);
+                            ShowDataFromTable(tableName, username);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ShowDataFromTable(string tableName, string username)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = $"PRAGMA table_info({tableName})";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        bool hasUsernameColumn = false;
+                        while (reader.Read())
+                        {
+                            if (reader.GetString(reader.GetOrdinal("name")).Equals("Username", StringComparison.OrdinalIgnoreCase))
+                            {
+                                hasUsernameColumn = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasUsernameColumn)
+                        {
+                            return;
+                        }
+                    }
+                    command.CommandText = $"SELECT * FROM {tableName} WHERE Username = @Username";
+                    command.Parameters.AddWithValue("@Username", username);
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             StringBuilder output = new StringBuilder();
-                            for (int i = 0; i < columnNames.Count; i++)
-                            {
-                                if (columnNames[i] != "username")
-                                {
-                                    output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
-                                }
-                            }
-                            // Remove the last comma and space
-                            output.Length -= 2;
+                            output.Append($"Table: {tableName}, ");
+                            output.Append($"StartDate: {reader.GetValue(reader.GetOrdinal("StartDate"))}, ");
+                            output.Append($"EndDate: {reader.GetValue(reader.GetOrdinal("EndDate"))}");
                             Console.WriteLine(output);
                         }
                     }
                 }
-            }  
+            }
         }
 
         public void ShowDataWithinTimePeriod(List<string> columnNames)
