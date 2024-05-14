@@ -12,7 +12,7 @@ namespace Project
         private string username;
         private string password;
         private string salt;
-        private string dataSource = "Data Source=/workspaces/project/usermanager.db;";
+        private string dataSource = "Data Source=/workspaces/project/usersDB.db;";
         private DataDB dataDB;
         
         public UsersDB(DataDB dataDB)
@@ -42,6 +42,7 @@ namespace Project
 
         public void AddUser(string username, string password)
         {
+            // EnsureDatabaseExists(dataSource);
             string salt = GenerateSalt();
             string hashedPassword = HashPassword(password, salt);
 
@@ -64,7 +65,7 @@ namespace Project
                 { "salt", salt },
                 { "creationTime", DateTime.Now.ToString() }
             };
-            dataDB.AddData("users", data);
+            dataDB.AddData("users", data, dataSource);
 
             UsersDB newUser = new(username, hashedPassword, this.dataDB);
             SetActiveUser(newUser);
@@ -72,6 +73,7 @@ namespace Project
 
         public void ShowUsers()
         {
+            // EnsureDatabaseExists(dataSource);
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -103,6 +105,7 @@ namespace Project
             }
         }
 
+
         private string GenerateSalt()
         {
             byte[] bytes = new byte[128 / 8];
@@ -115,6 +118,7 @@ namespace Project
 
         public bool ValidateUser(string username, string password)
         {
+            // EnsureDatabaseExists(dataSource);
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -140,5 +144,13 @@ namespace Project
             }
             return false;
         }
+
+        // private void EnsureDatabaseExists(string databasePath)
+        // {
+        //     if (!File.Exists(databasePath))
+        //     {
+        //         SQLiteConnection.CreateFile(databasePath);
+        //     }
+        // }
     }
 }

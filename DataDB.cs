@@ -73,7 +73,34 @@ namespace Project
                         command.Parameters.AddWithValue("@" + pair.Key, pair.Value);
                     }
 
-                    // Remove the trailing commas
+                    // Remove the last commas
+                    columnsBuilder.Length--;
+                    valuesBuilder.Length--;
+
+                    command.CommandText = $"INSERT INTO {tableName} ({columnsBuilder}) VALUES ({valuesBuilder})";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void AddData(string tableName, Dictionary<string, object> data, string dataSource)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    StringBuilder columnsBuilder = new StringBuilder();
+                    StringBuilder valuesBuilder = new StringBuilder();
+
+                    foreach (var pair in data)
+                    {
+                        columnsBuilder.Append(pair.Key + ",");
+                        valuesBuilder.Append("@" + pair.Key + ",");
+                        command.Parameters.AddWithValue("@" + pair.Key, pair.Value);
+                    }
+
+                    // Remove the last commas
                     columnsBuilder.Length--;
                     valuesBuilder.Length--;
 
