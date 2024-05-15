@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Globalization;
 using System.Text;
 using Project;
 namespace Project
@@ -25,16 +26,6 @@ namespace Project
                             DataDB dataDB = new DataDB();
                             Console.WriteLine("");
                             dataDB.ShowDataWithinTimePeriod();
-                            //TODO realize a ShowDataFromTableWithinTimePeriod method
-
-                            // DataDB dataDB = new DataDB();
-                            // var activeUser = UsersDB.GetActiveUser();
-                            // if (activeUser == null)
-                            // {
-                            //     Console.WriteLine("Problem with code logic, relogin please.");
-                            //     Program.RMain();
-                            // }
-                            // dataDB.ShowData(activeUser.GetUsername());
                             break;
                         case 3:
                             Logic logic = new Logic();
@@ -70,10 +61,36 @@ namespace Project
                     case 1:
                         try
                         {
-                            Console.WriteLine("Enter the start date(MM/dd/yyyy HH:mm): ");
-                            DateTime startDate = DateTime.Parse(Console.ReadLine()?? throw new ArgumentException("Start date time cannot be empty!"));
-                            Console.WriteLine("Enter the end date(MM/dd/yyyy HH:mm): ");
-                            DateTime endDate = DateTime.Parse(Console.ReadLine()?? throw new ArgumentException("End date time cannot be empty!"));
+                            DateTime startDate;
+                            while (true)
+                            {
+                                Console.WriteLine("Enter the start date(MM/dd/yyyy HH:mm:ss): ");
+                                string startDateInput = Console.ReadLine();
+                                if (DateTime.TryParseExact(startDateInput, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Start date time is not in the correct format! Please try again.");
+                                }
+                            }
+
+                            DateTime endDate;
+                            while (true)
+                            {
+                                Console.WriteLine("Enter the end date(MM/dd/yyyy HH:mm:ss): ");
+                                string endDateInput = Console.ReadLine();
+                                if (DateTime.TryParseExact(endDateInput, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out endDate))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("End date time is not in the correct format! Please try again.");
+                                }
+                            }
+
                             Console.WriteLine("Enter the type of data: ");
                             string typeOfData = Console.ReadLine()?? throw new ArgumentException("Type of data cannot be empty!");
 
@@ -93,17 +110,9 @@ namespace Project
                             };
                             MainData.AddData(typeOfData, data);
                         }
-                        catch (FormatException)
-                        {
-                            Console.WriteLine("Error: Invalid date format! Please enter a valid date.");
-                        }
                         catch (ArgumentException ex)
                         {
                             Console.WriteLine(ex.Message);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"An error occurred: {ex.Message}");
                         }
                         break;
                     case 2:
