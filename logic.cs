@@ -19,8 +19,7 @@ namespace Project
                     switch (choice)
                     {
                         case 1:
-                            Logic logic1 = new();
-                            logic1.AddData();
+                            new Logic().AddData();
                             break;
                         case 2:
                             DataDB dataDB = new DataDB();
@@ -115,7 +114,7 @@ namespace Project
         public void EditData()
         {
             DataDB dataDB = new DataDB();
-            var columns = new List<string> { "startDate", "endDate", "typeOfData", "username" };
+            var columns = new List<string> {  "username", "startDate", "endDate"};
             var activeUser = UsersDB.GetActiveUser();
             if (activeUser == null)
             {
@@ -127,7 +126,7 @@ namespace Project
             Console.WriteLine("Enter the ID of the data you want to edit: ");
             int id = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
 
-            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. Go back");
+            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n4. DeleteData\n3. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
 
             switch (choice)
@@ -145,6 +144,10 @@ namespace Project
                     Console.WriteLine("End date updated successfully!");
                     break;
                 case 3:
+
+
+                    break;
+                case 4:
                     MainLogic();
                     break;
                 default:
@@ -166,10 +169,15 @@ namespace Project
                     switch (choice)
                     {
                         case 1:
-                            DateTime startDate = DateTime.Now;
+                            DateTime now = DateTime.Now;
+                            DateTime startDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
                             Console.WriteLine("The timer has started. Press any key to stop the timer.");
-                            Console.ReadKey();
-                            DateTime endDate = DateTime.Now;
+                            while (!Console.KeyAvailable) // Wait until a key is pressed
+                            {
+                                Thread.Sleep(100);
+                            }
+                            now = DateTime.Now;
+                            DateTime endDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
                             Console.WriteLine("Enter the type of data: ");
                             string typeOfData = Console.ReadLine()?? throw new ArgumentException("Type of data cannot be empty!");
                             

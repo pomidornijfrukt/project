@@ -307,19 +307,14 @@ namespace Project
                 { "EndDate", "TEXT NOT NULL" }
             };
             CreateDatabaseTable(typeOfData, columns);
-            var activeUser = UsersDB.GetActiveUser();
-            if (activeUser == null)
-                {
-                    Console.WriteLine("Problem with code logic, relogin please.");
-                    Logic.MainLogic();
-                }
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
                     command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate, endDate = @EndDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@StartDate", startDate);
                     command.Parameters.AddWithValue("@EndDate", endDate);
                     command.Parameters.AddWithValue("@Id", id);
@@ -339,19 +334,14 @@ namespace Project
                 { "EndDate", "TEXT NOT NULL" }
             };
             CreateDatabaseTable(typeOfData, columns);
-            var activeUser = UsersDB.GetActiveUser();
-            if (activeUser == null)
-                {
-                    Console.WriteLine("Problem with code logic, relogin please.");
-                    Logic.MainLogic();
-                }
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
                     command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@StartDate", startDate);
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
@@ -370,19 +360,14 @@ namespace Project
                 { "EndDate", "TEXT NOT NULL" }
             };
             CreateDatabaseTable(typeOfData, columns);
-            var activeUser = UsersDB.GetActiveUser();
-            if (activeUser == null)
-                {
-                    Console.WriteLine("Problem with code logic, relogin please.");
-                    Logic.MainLogic();
-                }
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
                     command.CommandText = $"UPDATE {typeOfData} SET username = @Username, endDate = @EndDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", activeUser.GetUsername());
+                    command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@EndDate", endDate);
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
