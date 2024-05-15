@@ -23,14 +23,18 @@ namespace Project
                             break;
                         case 2:
                             DataDB dataDB = new DataDB();
-                            var columns = new List<string> { "startDate", "endDate", "typeOfData", "username"};
-                            var activeUser = UsersDB.GetActiveUser();
-                            if (activeUser == null)
-                            {
-                                Console.WriteLine("Problem with code logic, relogin please.");
-                                MainLogic();
-                            }
-                            dataDB.ShowData(activeUser.GetUsername());
+                            Console.WriteLine("");
+                            dataDB.ShowDataWithinTimePeriod();
+                            //TODO realize a ShowDataFromTableWithinTimePeriod method
+
+                            // DataDB dataDB = new DataDB();
+                            // var activeUser = UsersDB.GetActiveUser();
+                            // if (activeUser == null)
+                            // {
+                            //     Console.WriteLine("Problem with code logic, relogin please.");
+                            //     Program.RMain();
+                            // }
+                            // dataDB.ShowData(activeUser.GetUsername());
                             break;
                         case 3:
                             Logic logic = new Logic();
@@ -103,7 +107,7 @@ namespace Project
                         }
                         break;
                     case 2:
-                        ContinueLogic();
+                        LogicBasicInput();
                         break;
                     case 3:
                         MainLogic();
@@ -113,8 +117,8 @@ namespace Project
         }
         public void EditData()
         {
+            // Showing data to user
             DataDB dataDB = new DataDB();
-            var columns = new List<string> {  "username", "startDate", "endDate"};
             var activeUser = UsersDB.GetActiveUser();
             if (activeUser == null)
             {
@@ -123,10 +127,12 @@ namespace Project
             }
             dataDB.ShowData(activeUser.GetUsername());
 
-            Console.WriteLine("Enter the ID of the data you want to edit: ");
+            Console.WriteLine("Enter the table name of the data that you want to edit: ");
+            string tablename = Console.ReadLine() ?? throw new ArgumentException("Error: Invalid input!");
+            Console.WriteLine("Enter the ID of the data that you want to edit: ");
             int id = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
 
-            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n4. DeleteData\n3. Go back");
+            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. DeleteData\n4. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
 
             switch (choice)
@@ -134,13 +140,13 @@ namespace Project
                 case 1:
                     Console.WriteLine("Enter the new start date(MM/dd/yyyy HH:mm): ");
                     DateTime newStartDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("Start date time cannot be empty!"));
-                    dataDB.UpdateDataWithStartDate(id, activeUser.GetUsername(), "startDate", newStartDate);
+                    dataDB.UpdateDataWithDate(id, activeUser.GetUsername(), tablename, newStartDate, true);
                     Console.WriteLine("Start date updated successfully!");
                     break;
                 case 2:
                     Console.WriteLine("Enter the new end date(MM/dd/yyyy HH:mm): ");
                     DateTime newEndDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("End date time cannot be empty!"));
-                    dataDB.UpdateDataWithEndDate(id, activeUser.GetUsername(), "endDate", newEndDate);
+                    dataDB.UpdateDataWithDate(id, activeUser.GetUsername(), tablename, newEndDate, false);
                     Console.WriteLine("End date updated successfully!");
                     break;
                 case 3:
@@ -157,7 +163,7 @@ namespace Project
         }
 
         
-        public void ContinueLogic()
+        public void LogicBasicInput()
         {
             bool t = true;
             while(t)

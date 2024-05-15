@@ -9,6 +9,11 @@ namespace Project
         protected UsersDB? usersDB;
         protected string dataSource = "Data Source=/workspaces/project/data.db";
 
+        public static DateTime TruncateToMinute(DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0);
+        }
+
         public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -184,6 +189,7 @@ namespace Project
                         {
                             StringBuilder output = new StringBuilder();
                             output.Append($"Table: {tableName}, ");
+                            output.Append($"ID: {reader.GetValue(reader.GetOrdinal("ID"))}, ");
                             output.Append($"StartDate: {reader.GetValue(reader.GetOrdinal("StartDate"))}, ");
                             output.Append($"EndDate: {reader.GetValue(reader.GetOrdinal("EndDate"))}");
                             Console.WriteLine(output);
@@ -193,7 +199,7 @@ namespace Project
             }
         }
 
-        public void ShowDataWithinTimePeriod(List<string> columnNames)
+        public void ShowDataWithinTimePeriod()
         {
             var activeUser = UsersDB.GetActiveUser();
             if (activeUser == null)
@@ -206,29 +212,43 @@ namespace Project
             bool firstInput = true;
             while (true)
             {
-                Console.WriteLine("Enter how long ago to see. 1.Month 2.Weeks 3.Days 4.Hours" + (firstInput ? "" : " 5.Continue"));
-                int timeUnit = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Enter how long ago to see. 1.Years 2.Month 3.Weeks 4.Days 5.Hours 6.Minutes" + (firstInput ? "" : " 5.Continue"));
+                if (!int.TryParse(Console.ReadLine(), out int timeUnit))
+                {
+                    Console.WriteLine("Invalid input. Please enter a number.");
+                    continue;
+                }
                 if (timeUnit == 5 && !firstInput)
                 {
                     break;
                 }
                 Console.WriteLine("Enter the amount of time units.");
-                int amount = Convert.ToInt32(Console.ReadLine());
+                if (!int.TryParse(Console.ReadLine(), out int amount) || amount < 0)
+                {
+                    Console.WriteLine("Invalid input. Please enter a positive number.");
+                    continue;
+                }
 
                 TimeSpan timeSpan;
                 switch (timeUnit)
                 {
                     case 1:
-                        timeSpan = TimeSpan.FromDays(amount * 30); // Approximate a month as 30 days
+                        timeSpan = TimeSpan.FromDays(amount * 365); // Approximate a year as 365 days
                         break;
                     case 2:
-                        timeSpan = TimeSpan.FromDays(amount * 7); // A week is 7 days
+                        timeSpan = TimeSpan.FromDays(amount * 30); // Approximate a month as 30 days
                         break;
                     case 3:
-                        timeSpan = TimeSpan.FromDays(amount);
+                        timeSpan = TimeSpan.FromDays(amount * 7); // A week is 7 days
                         break;
                     case 4:
+                        timeSpan = TimeSpan.FromDays(amount);
+                        break;
+                    case 5:
                         timeSpan = TimeSpan.FromHours(amount);
+                        break;
+                    case 6:
+                        timeSpan = TimeSpan.FromMinutes(amount);
                         break;
                     default:
                         Console.WriteLine("Invalid time unit.");
@@ -238,34 +258,58 @@ namespace Project
                 firstInput = false;
             }
 
-            DateTime cutoff = DateTime.Now - totalSpan;
+            DateTime cutoff = TruncateToMinute(DateTime.Now) - totalSpan;
 
-            using (var connection = new SQLiteConnection(dataSource))
+            try
             {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                using (var connection = new SQLiteConnection(dataSource))
                 {
-                    command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
-                    using (var reader = command.ExecuteReader())
+                    connection.Open();
+                    using (var command = new SQLiteCommand(connection))
                     {
-                        while (reader.Read())
+                        command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
+                        using (var reader = command.ExecuteReader())
                         {
-                            string tableName = reader.GetString(0);
-                            ShowDataFromTableWithinTimePeriod(tableName, columnNames, activeUser.GetUsername(), cutoff);
+                            while (reader.Read())
+                            {
+                                string tableName = reader.GetString(0);
+                                ShowDataFromTableWithinTimePeriod(tableName, activeUser.GetUsername(), cutoff);
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
         }
 
-        private void ShowDataFromTableWithinTimePeriod(string tableName, List<string> columnNames, string username, DateTime cutoff)
+        private void ShowDataFromTableWithinTimePeriod(string tableName, string username, DateTime cutoff)
         {
+            // Skip the sqlite_sequence table
+            if (tableName == "sqlite_sequence")
+            {
+                return;
+            }
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"SELECT * FROM {tableName} WHERE username = @Username AND endDate >= @Cutoff";
+                    // Get column names
+                    command.CommandText = $"PRAGMA table_info({tableName})";
+                    var columnNames = new List<string>();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            columnNames.Add(reader.GetString(1)); // Column name is in the second column of the result set
+                        }
+                    }
+
+                    // Get data
+                    command.CommandText = $"SELECT * FROM {tableName} WHERE Username = @Username AND EndDate >= @Cutoff";
                     command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@Cutoff", cutoff);
                     using (var reader = command.ExecuteReader())
@@ -275,9 +319,9 @@ namespace Project
                             StringBuilder output = new StringBuilder();
                             for (int i = 0; i < columnNames.Count; i++)
                             {
-                                if (columnNames[i] != "username")
+                                if (columnNames[i] != "Username")
                                 {
-                                    if (columnNames[i] == "endDate" && Convert.ToDateTime(reader.GetValue(i)) < cutoff)
+                                    if (columnNames[i] == "EndDate" && Convert.ToDateTime(reader.GetValue(i)) < cutoff)
                                     {
                                         output.Append($"{columnNames[i]}: {cutoff}, ");
                                     }
@@ -313,7 +357,7 @@ namespace Project
                 connection.Open();
                 using (var command = new SQLiteCommand(connection))
                 {
-                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate, endDate = @EndDate WHERE Id = @Id";
+                    command.CommandText = $"UPDATE {typeOfData} SET Username = @Username, StartDate = @StartDate, EndDate = @EndDate WHERE Id = @Id";
                     command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@StartDate", startDate);
                     command.Parameters.AddWithValue("@EndDate", endDate);
@@ -323,55 +367,53 @@ namespace Project
             }
         }
 
-        public void UpdateDataWithStartDate(int id, string username, string typeOfData, DateTime startDate)
+        public void UpdateDataWithDate(int id, string username, string typeOfData, DateTime date, bool isStartDate)
         {
-            // Creating table if it doesn't exist
-            var columns = new Dictionary<string, string>
+            try
             {
-                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
-                { "Username", "TEXT NOT NULL" },
-                { "StartDate", "TEXT NOT NULL" },
-                { "EndDate", "TEXT NOT NULL" }
-            };
-            CreateDatabaseTable(typeOfData, columns);
-
-            using (var connection = new SQLiteConnection(dataSource))
-            {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
+                // Ensure the table exists
+                var columns = new Dictionary<string, string>
                 {
-                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, startDate = @StartDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@StartDate", startDate);
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.ExecuteNonQuery();
+                    { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
+                    { "Username", "TEXT NOT NULL" },
+                    { "StartDate", "TEXT NOT NULL" },
+                    { "EndDate", "TEXT NOT NULL" }
+                };
+                CreateDatabaseTable(typeOfData, columns);
+
+                using (var connection = new SQLiteConnection(dataSource))
+                {
+                    connection.Open();
+                    using (var command = new SQLiteCommand(connection))
+                    {
+                        DateTime truncatedDate = TruncateToMinute(date);
+                        string dateType = isStartDate ? "StartDate" : "EndDate";
+
+                        command.CommandText = $"UPDATE {typeOfData} SET {dateType} = @{dateType} WHERE Id = @Id AND Username = @Username";
+                        command.Parameters.AddWithValue($"@{dateType}", truncatedDate.ToString("yyyy-MM-dd HH:mm")); // Ensure correct format
+                        command.Parameters.AddWithValue("@Id", id);
+                        command.Parameters.AddWithValue("@Username", username);
+
+                        // Debugging: Print the final SQL query and parameters
+                        Console.WriteLine($"Executing SQL: UPDATE {typeOfData} SET {dateType} = @{dateType} WHERE Id = @Id AND Username = @Username");
+                        Console.WriteLine($"Parameters: {dateType}={truncatedDate}, Id={id}, Username={username}");
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected == 0)
+                        {
+                            Console.WriteLine("No rows updated. Please check the ID and username.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{dateType} updated successfully!");
+                        }
+                    }
                 }
             }
-        }
-
-        public void UpdateDataWithEndDate(int id, string username, string typeOfData, DateTime endDate)
-        {
-            // Creating table if it doesn't exist
-            var columns = new Dictionary<string, string>
+            catch (Exception ex)
             {
-                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
-                { "Username", "TEXT NOT NULL" },
-                { "StartDate", "TEXT NOT NULL" },
-                { "EndDate", "TEXT NOT NULL" }
-            };
-            CreateDatabaseTable(typeOfData, columns);
-
-            using (var connection = new SQLiteConnection(dataSource))
-            {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
-                {
-                    command.CommandText = $"UPDATE {typeOfData} SET username = @Username, endDate = @EndDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@EndDate", endDate);
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.ExecuteNonQuery();
-                }
+                Console.WriteLine($"An error occurred while updating {typeOfData}: {ex.Message}");
             }
         }
     }
