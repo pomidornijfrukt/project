@@ -8,10 +8,34 @@ namespace Project
     {
         protected UsersDB? usersDB;
         protected string dataSource = "Data Source=/workspaces/project/data.db";
-
+        
+        public static DateTime GetTimeInGTMPlus3(DateTime dateTime)
+        {
+            return dateTime.AddHours(3);
+        }
+        
         public static DateTime TruncateToMinute(DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0);
+        }
+
+        public void DeleteData(int dataId, string tableName)
+        {
+            using (var connection = new SQLiteConnection(dataSource))
+            {
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    UsersDB user = UsersDB.GetActiveUser();
+                   
+                    string sqlQuery = $"DELETE FROM {tableName} WHERE Id = @Id AND Username = @Username";
+                    command.Parameters.AddWithValue("@Id", dataId);
+                    command.Parameters.AddWithValue("@Username", user.GetUsername());
+                    
+                    command.CommandText = sqlQuery;
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns)
@@ -138,6 +162,11 @@ namespace Project
 
         public void ShowData(string username)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                Console.WriteLine("Data source or username is null or empty.");
+                return;
+            }
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -146,6 +175,11 @@ namespace Project
                     command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
                     using (var reader = command.ExecuteReader())
                     {
+                        if (reader == null)
+                        {
+                            Console.WriteLine("Failed to execute reader.");
+                            return;
+                        }
                         while (reader.Read())
                         {
                             string tableName = reader.GetString(0);
@@ -258,7 +292,7 @@ namespace Project
                 firstInput = false;
             }
 
-            DateTime cutoff = TruncateToMinute(DateTime.Now) - totalSpan;
+            DateTime cutoff = TruncateToMinute(GetTimeInGTMPlus3(DateTime.Now)) - totalSpan;
 
             try
             {
@@ -292,6 +326,9 @@ namespace Project
             {
                 return;
             }
+
+            TimeSpan totalSpan = TimeSpan.Zero;
+
             using (var connection = new SQLiteConnection(dataSource))
             {
                 connection.Open();
@@ -314,30 +351,90 @@ namespace Project
                     command.Parameters.AddWithValue("@Cutoff", cutoff);
                     using (var reader = command.ExecuteReader())
                     {
+                        DateTime StartDate = new(), EndDate = new();
                         while (reader.Read())
                         {
-                            StringBuilder output = new StringBuilder();
                             for (int i = 0; i < columnNames.Count; i++)
                             {
                                 if (columnNames[i] != "Username")
                                 {
-                                    if (columnNames[i] == "EndDate" && Convert.ToDateTime(reader.GetValue(i)) < cutoff)
+                                    if (columnNames[i] == "EndDate")
                                     {
-                                        output.Append($"{columnNames[i]}: {cutoff}, ");
-                                    }
-                                    else
+                                        EndDate = Convert.ToDateTime(reader.GetValue(i));
+                                        if (EndDate < cutoff)
+                                        {
+                                            continue;
+                                        }
+                                        else if (EndDate > GetTimeInGTMPlus3(DateTime.Now))
+                                        {
+                                            EndDate = TruncateToMinute(GetTimeInGTMPlus3(DateTime.Now));
+                                        }
+                                    } 
+                                    else if (columnNames[i] == "StartDate")
                                     {
-                                        output.Append($"{columnNames[i]}: {reader.GetValue(i)}, ");
-                                    }
+                                        StartDate = Convert.ToDateTime(reader.GetValue(i));
+                                        if (StartDate < cutoff)
+                                        {
+                                            StartDate = cutoff;
+                                        }
+                                    }                           
                                 }
                             }
-                            // Remove the last comma and space
-                            output.Length -= 2;
-                            Console.WriteLine(output);
+                            totalSpan += EndDate - StartDate;
                         }
                     }
                 }
             }
+
+            Console.WriteLine($"Total time for {tableName}: {TimeSpanDiff(DateTime.Now, DateTime.Now - totalSpan)}");
+        }
+
+        public static string TimeSpanDiff(DateTime dateTime, DateTime dateTime2)
+        {
+            TimeSpan difference = dateTime - dateTime2;
+
+            int years = difference.Days / 365; // Number of years
+            difference = difference.Add(TimeSpan.FromDays(-years * 365)); // Subtract the years
+
+            int months = difference.Days / 30; // Number of months
+            difference = difference.Add(TimeSpan.FromDays(-months * 30)); // Subtract the months
+
+            int weeks = difference.Days / 7; // Number of weeks
+            difference = difference.Add(TimeSpan.FromDays(-weeks * 7)); // Subtract the weeks
+
+            int days = difference.Days; // Number of days
+            int hours = difference.Hours; // Number of hours
+            int minutes = difference.Minutes; // Number of minutes
+
+            StringBuilder output = new StringBuilder();
+
+            var timeUnits = new List<(int, string)>
+            {
+                (years, "year(s)"),
+                (months, "month(s)"),
+                (weeks, "week(s)"),
+                (days, "day(s)"),
+                (hours, "hour(s)"),
+                (minutes, "minute(s)")
+            };
+
+            foreach (var (value, unit) in timeUnits)
+            {
+                switch (value)
+                {
+                    case int v when v > 0:
+                        output.Append($"{value} {unit}, ");
+                        break;
+                }
+            }
+
+            // Remove the last comma and space
+            if (output.Length > 0)
+            {
+                output.Remove(output.Length - 2, 2);
+            }
+
+            return output.ToString();
         }
 
         public void UpdateData(int id, string username, string typeOfData, DateTime startDate, DateTime endDate)

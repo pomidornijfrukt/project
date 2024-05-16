@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 namespace Project
 {
@@ -12,6 +14,39 @@ namespace Project
             this.usersDB = usersDB; // Added this line
         }
 
+        public static string GetPassword()
+        {
+            StringBuilder input = new StringBuilder();
+            while (true)
+            {
+                int x = Console.CursorLeft;
+                int y = Console.CursorTop;
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine();
+                    break;
+                }
+                if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                {
+                    input.Remove(input.Length - 1, 1);
+                    Console.SetCursorPosition(x - 1, y);
+                    Console.Write(" ");
+                    Console.SetCursorPosition(x - 1, y);
+                }
+                else if( key.KeyChar < 32 || key.KeyChar > 126 )
+                {
+                    Trace.WriteLine("Output suppressed: no key char"); //catch non-printable chars, e.g F1, CursorUp and so ...
+                }
+                else if (key.Key != ConsoleKey.Backspace)
+                {
+                    input.Append(key.KeyChar);
+                    Console.Write("*");
+                }
+            }
+            return input.ToString();
+        }
+
         public void Register()
         {
             Console.WriteLine("Enter your username: ");
@@ -22,7 +57,7 @@ namespace Project
             }
 
             Console.WriteLine("Enter your password: ");
-            string password = Console.ReadLine();
+            string password = GetPassword();
             if (string.IsNullOrEmpty(password))
             {
                 throw new ArgumentException("Password cannot be empty");
@@ -58,7 +93,7 @@ namespace Project
                 throw new ArgumentException("Invalid username!");
             }
             Console.WriteLine("Enter your password: ");
-            string inputPassword = Console.ReadLine() ?? throw new ArgumentException("Password cannot be empty!");
+            string inputPassword = GetPassword() ?? throw new ArgumentException("Password cannot be empty!");
             if (usersDB.ValidateUser(inputUsername, inputPassword))
             {
                 Console.WriteLine("You are logged in!");

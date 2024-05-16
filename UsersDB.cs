@@ -62,7 +62,7 @@ namespace Project
                 { "username", username },
                 { "password", hashedPassword },
                 { "salt", salt },
-                { "creationTime", DateTime.Now.ToString() }
+                { "creationTime", DataDB.GetTimeInGTMPlus3(DateTime.Now).ToString() }
             };
             dataDB.AddData("users", data, dataSource);
 

@@ -159,8 +159,9 @@ namespace Project
                     Console.WriteLine("End date updated successfully!");
                     break;
                 case 3:
-
-
+                    dataDB.DeleteData(id, tablename);
+                    Console.WriteLine("Fine! there is your new data!\n");
+                    dataDB.ShowData(activeUser.GetUsername());
                     break;
                 case 4:
                     MainLogic();
