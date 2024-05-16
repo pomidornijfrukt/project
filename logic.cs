@@ -20,18 +20,21 @@ namespace Project
                     switch (choice)
                     {
                         case 1:
+                            Console.Clear();
                             new Logic().AddData();
                             break;
                         case 2:
+                            Console.Clear();
                             DataDB dataDB = new DataDB();
-                            Console.WriteLine("");
                             dataDB.ShowDataWithinTimePeriod();
                             break;
                         case 3:
+                            Console.Clear();
                             Logic logic = new Logic();
-                            logic.EditData();
+                            EditData();
                             break;
                         case 4:
+                            Console.Clear();
                             Program.RMain();
                             break;
                         default:
@@ -59,12 +62,13 @@ namespace Project
                 switch (choice)
                 {
                     case 1:
+                        Console.Clear();
                         try
                         {
                             DateTime startDate;
                             while (true)
                             {
-                                Console.WriteLine("Enter the start date(MM/dd/yyyy HH:mm:ss): ");
+                                Console.Write("Enter the start date(MM/dd/yyyy HH:mm:ss):\n(Ctrl + C to go back): ");
                                 string startDateInput = Console.ReadLine();
                                 if (DateTime.TryParseExact(startDateInput, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate))
                                 {
@@ -116,16 +120,19 @@ namespace Project
                         }
                         break;
                     case 2:
+                        Console.Clear();
                         LogicBasicInput();
                         break;
                     case 3:
+                        Console.Clear();
                         MainLogic();
                         break;
                 }
             }
         }
-        public void EditData()
+        public static void EditData()
         {
+            Console.Clear();
             // Showing data to user
             DataDB dataDB = new DataDB();
             var activeUser = UsersDB.GetActiveUser();
@@ -143,22 +150,23 @@ namespace Project
 
             Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. DeleteData\n4. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
-
+            
             switch (choice)
             {
                 case 1:
-                    Console.WriteLine("Enter the new start date(MM/dd/yyyy HH:mm): ");
-                    DateTime newStartDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("Start date time cannot be empty!"));
+                    Console.Write("Enter the start date(MM/dd/yyyy HH:mm:ss):\n ");
+                    DateTime newStartDate = DateTime.Parse(Console.ReadLine());
                     dataDB.UpdateDataWithDate(id, activeUser.GetUsername(), tablename, newStartDate, true);
                     Console.WriteLine("Start date updated successfully!");
                     break;
                 case 2:
-                    Console.WriteLine("Enter the new end date(MM/dd/yyyy HH:mm): ");
+                    Console.Write("Enter the end date(MM/dd/yyyy HH:mm:ss):\n ");
                     DateTime newEndDate = DateTime.Parse(Console.ReadLine() ?? throw new ArgumentException("End date time cannot be empty!"));
                     dataDB.UpdateDataWithDate(id, activeUser.GetUsername(), tablename, newEndDate, false);
                     Console.WriteLine("End date updated successfully!");
                     break;
                 case 3:
+                    Console.Clear();
                     dataDB.DeleteData(id, tablename);
                     Console.WriteLine("Fine! there is your new data!\n");
                     dataDB.ShowData(activeUser.GetUsername());
@@ -211,7 +219,6 @@ namespace Project
                                 { "username", activeUser.GetUsername() }
                             };
                             MainData.AddData(typeOfData, data);
-
                             break;
                         case 2:
                             MainLogic();

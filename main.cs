@@ -29,6 +29,7 @@ namespace Project
                     switch (choice)
                     {
                         case 1:
+                           Console.Clear();
                             registration.Register();
                             if (registration.LogStatus())
                             {
@@ -40,6 +41,7 @@ namespace Project
                             }
                             break;
                         case 2:
+                            Console.Clear();
                             registration.Login();
                             if (registration.isLogged)
                             {   

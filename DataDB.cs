@@ -292,6 +292,8 @@ namespace Project
                 firstInput = false;
             }
 
+            Console.Clear();
+
             DateTime cutoff = TruncateToMinute(GetTimeInGTMPlus3(DateTime.Now)) - totalSpan;
 
             try
