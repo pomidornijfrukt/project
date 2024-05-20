@@ -2,18 +2,22 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+
 namespace Project
 {
     class Registration
     {
-        private UsersDB usersDB; // Added this line
-        public bool isLogged = false;
+        private UsersDB usersDB; // Database of users
 
-        public Registration(UsersDB usersDB) // Added this line
+        public bool isLogged = false; // Flag to check if user is logged in
+
+        // Constructor that initializes the user database
+        public Registration(UsersDB usersDB)
         {
-            this.usersDB = usersDB; // Added this line
+            this.usersDB = usersDB;
         }
 
+        // Method to get password from user input, masking the input with '*'
         public static string GetPassword()
         {
             StringBuilder input = new StringBuilder();
@@ -47,8 +51,10 @@ namespace Project
             return input.ToString();
         }
 
+        // Method to register a new user
         public void Register()
         {
+            // Get username
             Console.WriteLine("Enter your username: ");
             string username = Console.ReadLine();
             if (string.IsNullOrEmpty(username))
@@ -56,6 +62,7 @@ namespace Project
                 throw new ArgumentException("Username cannot be empty");
             }
 
+            // Get password
             Console.WriteLine("Enter your password: ");
             string password = GetPassword();
             if (string.IsNullOrEmpty(password))
@@ -71,6 +78,7 @@ namespace Project
                 throw new ArgumentException("Password must be longer than 6 characters");
             } 
 
+            // Get email
             Console.WriteLine("Enter your email: ");
             string input = Console.ReadLine() ?? throw new ArgumentException("Email cannot be empty!");
             string emailPattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$";
@@ -80,38 +88,43 @@ namespace Project
             }
             string email = input;
 
+            // Add user to database
             usersDB.AddUser(username, password);
             isLogged = true;
         }
 
+        // Method to log in a user
         public void Login()
         {
+            // Get username
             Console.WriteLine("Enter your username: ");
             string inputUsername = Console.ReadLine() ?? throw new ArgumentException("Username cannot be empty!");
             if (!usersDB.ValidateUserUsername(inputUsername))
             {
                 throw new ArgumentException("Invalid username!");
             }
+
+            // Get password
             Console.WriteLine("Enter your password: ");
             string inputPassword = GetPassword() ?? throw new ArgumentException("Password cannot be empty!");
             if (usersDB.ValidateUser(inputUsername, inputPassword))
             {
                 Console.WriteLine("You are logged in!");
                 isLogged = true;
-                // usersDB.SetActiveUser(newUser);
             }
             else
             {
                 Console.WriteLine("Invalid username or password!");
             }
-
         }
 
+        // Method to log out a user
         public void Logout()
         {
             isLogged = false;
         }
 
+        // Method to check if a user is logged in
         public bool LogStatus() => isLogged;
     }
 }

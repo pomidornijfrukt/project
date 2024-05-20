@@ -4,14 +4,16 @@ using System.Data.SQLite;
 using System.Globalization;
 using System.Text;
 using Project;
+
 namespace Project
 {
     class Logic
     {
+        // Main logic for user interactions
         public static void MainLogic()
         {
             bool t = true;
-            while(t)
+            while (t)
             {
                 Console.WriteLine("Choose an option using a corresponding number:\n1. Add data\n2. Show data\n3. Edit data\n4. Go back");
                 try
@@ -53,6 +55,7 @@ namespace Project
             }
         }
 
+        // Logic for adding data
         public void AddData()
         {
             while (true)
@@ -96,7 +99,7 @@ namespace Project
                             }
 
                             Console.WriteLine("Enter the type of data: ");
-                            string typeOfData = Console.ReadLine()?? throw new ArgumentException("Type of data cannot be empty!");
+                            string typeOfData = Console.ReadLine() ?? throw new ArgumentException("Type of data cannot be empty!");
 
                             var activeUser = UsersDB.GetActiveUser();
                             if (activeUser == null)
@@ -130,6 +133,8 @@ namespace Project
                 }
             }
         }
+
+        // Logic for editing data
         public static void EditData()
         {
             Console.Clear();
@@ -148,7 +153,7 @@ namespace Project
             Console.WriteLine("Enter the ID of the data that you want to edit: ");
             int id = int.TryParse(Console.ReadLine(), out int result) ? result : throw new ArgumentException("Error: Invalid input!");
 
-            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. DeleteData\n4. Go back");
+            Console.WriteLine("Choose an option using a corresponding number:\n1. Edit start date\n2. Edit end date\n3. Delete data\n4. Go back");
             int choice = int.TryParse(Console.ReadLine(), out int option) ? option : throw new ArgumentException("Error: Invalid input!");
             
             switch (choice)
@@ -168,7 +173,7 @@ namespace Project
                 case 3:
                     Console.Clear();
                     dataDB.DeleteData(id, tablename);
-                    Console.WriteLine("Fine! there is your new data!\n");
+                    Console.WriteLine("Record deleted successfully!");
                     dataDB.ShowData(activeUser.GetUsername());
                     break;
                 case 4:
@@ -180,11 +185,11 @@ namespace Project
             }
         }
 
-        
+        // Logic for adding basic input data
         public void LogicBasicInput()
         {
             bool t = true;
-            while(t)
+            while (t)
             {
                 Console.WriteLine("Choose an option using a corresponding number:\n1. Add data\n2. Go Back");
                 try
@@ -203,7 +208,7 @@ namespace Project
                             now = DateTime.Now;
                             DateTime endDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
                             Console.WriteLine("Enter the type of data: ");
-                            string typeOfData = Console.ReadLine()?? throw new ArgumentException("Type of data cannot be empty!");
+                            string typeOfData = Console.ReadLine() ?? throw new ArgumentException("Type of data cannot be empty!");
                             
                             var activeUser = UsersDB.GetActiveUser();
                             if (activeUser == null)
