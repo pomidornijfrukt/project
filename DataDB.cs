@@ -451,34 +451,6 @@ namespace Project
             return output.ToString();
         }
 
-        // Updates a record in the specified table with new data
-        public void UpdateData(int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
-        {
-            // Creating table if it doesn't exist
-            var columns = new Dictionary<string, string>
-            {
-                { "Id", "INTEGER PRIMARY KEY AUTOINCREMENT" },
-                { "Username", "TEXT NOT NULL" },
-                { "StartDate", "TEXT NOT NULL" },
-                { "EndDate", "TEXT NOT NULL" }
-            };
-            CreateDatabaseTable(typeOfData, columns);
-
-            using (var connection = new SQLiteConnection(dataSource))
-            {
-                connection.Open();
-                using (var command = new SQLiteCommand(connection))
-                {
-                    command.CommandText = $"UPDATE {typeOfData} SET Username = @Username, StartDate = @StartDate, EndDate = @EndDate WHERE Id = @Id";
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@StartDate", startDate);
-                    command.Parameters.AddWithValue("@EndDate", endDate);
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
         // Updates either the StartDate or EndDate of a record in the specified table
         public void UpdateDataWithDate(int id, string username, string typeOfData, DateTime date, bool isStartDate)
         {
