@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Text;
+
 namespace Project
 {
     public class DataDB
@@ -9,16 +10,19 @@ namespace Project
         protected UsersDB? usersDB;
         protected string dataSource = "Data Source=/workspaces/project/data.db";
         
+        // Adjusts the input DateTime to GMT+3
         public static DateTime GetTimeInGTMPlus3(DateTime dateTime)
         {
             return dateTime.AddHours(3);
         }
         
+        // Truncates the input DateTime to the nearest minute
         public static DateTime TruncateToMinute(DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0);
         }
 
+        // Deletes a record from the specified table based on dataId and active user's username
         public void DeleteData(int dataId, string tableName)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -38,6 +42,7 @@ namespace Project
             }
         }
 
+        // Creates a table with the specified columns if it doesn't exist
         public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -61,6 +66,7 @@ namespace Project
             }
         }
 
+        // Overloaded method to create a table with a custom data source
         public void CreateDatabaseTable(string tableName, Dictionary<string, string> columns, string dataSource)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -84,7 +90,7 @@ namespace Project
             }
         }
 
-
+        // Adds data to the specified table
         public void AddData(string tableName, Dictionary<string, object> data)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -122,6 +128,7 @@ namespace Project
             }
         }
 
+        // Overloaded method to add data with a custom data source
         public void AddData(string tablename, Dictionary<string, object> data, string dataSource)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -160,6 +167,7 @@ namespace Project
             }
         }
 
+        // Displays all data for the specified user
         public void ShowData(string username)
         {
             if (string.IsNullOrEmpty(username))
@@ -190,6 +198,7 @@ namespace Project
             }
         }
 
+        // Displays data from a specific table for the specified user
         private void ShowDataFromTable(string tableName, string username)
         {
             using (var connection = new SQLiteConnection(dataSource))
@@ -233,6 +242,7 @@ namespace Project
             }
         }
 
+        // Displays data within a user-specified time period
         public void ShowDataWithinTimePeriod()
         {
             var activeUser = UsersDB.GetActiveUser();
@@ -321,6 +331,7 @@ namespace Project
             }
         }
 
+        // Displays data from a specific table within a specified time period for the user
         private void ShowDataFromTableWithinTimePeriod(string tableName, string username, DateTime cutoff)
         {
             // Skip the sqlite_sequence table
@@ -391,6 +402,7 @@ namespace Project
             Console.WriteLine($"Total time for {tableName}: {TimeSpanDiff(DateTime.Now, DateTime.Now - totalSpan)}");
         }
 
+        // Calculates the difference between two DateTime objects and formats it as a string
         public static string TimeSpanDiff(DateTime dateTime, DateTime dateTime2)
         {
             TimeSpan difference = dateTime - dateTime2;
@@ -439,6 +451,7 @@ namespace Project
             return output.ToString();
         }
 
+        // Updates a record in the specified table with new data
         public void UpdateData(int id, string username, string typeOfData, DateTime startDate, DateTime endDate)
         {
             // Creating table if it doesn't exist
@@ -466,6 +479,7 @@ namespace Project
             }
         }
 
+        // Updates either the StartDate or EndDate of a record in the specified table
         public void UpdateDataWithDate(int id, string username, string typeOfData, DateTime date, bool isStartDate)
         {
             try
