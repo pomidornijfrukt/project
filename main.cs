@@ -9,6 +9,8 @@ namespace Project
         {
             RMain();
         }
+
+        // Main routine for registration and login
         public static void RMain()
         {
             DataDB dataDB = new DataDB();
@@ -17,6 +19,7 @@ namespace Project
             bool t = true;
             while (t)
             {
+                // Check if the user is already logged in
                 if (registration.LogStatus())
                 {
                     t = false; 
@@ -25,11 +28,11 @@ namespace Project
                 Console.WriteLine("Choose an option using a corresponding number:\n1. Register\n2. Login\n3. Exit");
                 try
                 {
-                    int choice = int.Parse(Console.ReadLine()?? throw new ArgumentException("Choice cannot be empty!"));
+                    int choice = int.Parse(Console.ReadLine() ?? throw new ArgumentException("Choice cannot be empty!"));
                     switch (choice)
                     {
                         case 1:
-                           Console.Clear();
+                            Console.Clear();
                             registration.Register();
                             if (registration.LogStatus())
                             {
@@ -68,34 +71,3 @@ namespace Project
         }
     }   
 }
-
-
-
-// private static string connectionString = "Data Source=data.db;Version=3;";
-//  using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-//             {
-//                 connection.Open();
-//                 CreateTable(connection);
-//                 InsertData(connection, "John", 25);
-//                 InsertData(connection, "Jane", 30);
-//             }
-//         }
-
-//         private static void CreateTable(SQLiteConnection connection)
-//         {
-//             string createTableQuery = "CREATE TABLE IF NOT EXISTS dataTEST (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER)";
-//             using (SQLiteCommand command = new SQLiteCommand(createTableQuery, connection))
-//             {
-//                 command.ExecuteNonQuery();
-//             }
-//         }
-
-//         private static void InsertData(SQLiteConnection connection, string name, int age)
-//         {
-//             string insertDataQuery = "INSERT INTO dataTEST (name, age) VALUES (@name, @age)";
-//             using (SQLiteCommand command = new SQLiteCommand(insertDataQuery, connection))
-//             {
-//                 command.Parameters.AddWithValue("@name", name);
-//                 command.Parameters.AddWithValue("@age", age);
-//                 command.ExecuteNonQuery();
-//             }
