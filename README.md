@@ -16,7 +16,7 @@ This is a .NET project that includes a data management system using SQLite. It p
 1. Clone the repository:
     ```sh
     git clone https://github.com/pomidornijfrukt/project.git
-    cd project
+    cd Project
     ```
 
 2. Install the necessary .NET SDK. You can download it from [here](https://dotnet.microsoft.com/download/dotnet/8.0).
