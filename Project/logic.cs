@@ -71,7 +71,7 @@ namespace Project
                             DateTime startDate;
                             while (true)
                             {
-                                Console.Write("Enter the start date(MM/dd/yyyy HH:mm:ss):\n(Ctrl + C to go back): ");
+                                Console.Write("Enter the start date(MM/dd/yyyy HH:mm:ss): ");
                                 string startDateInput = Console.ReadLine();
                                 if (DateTime.TryParseExact(startDateInput, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDate))
                                 {
