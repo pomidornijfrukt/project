@@ -322,10 +322,15 @@ namespace Project
                         command.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
                         using (var reader = command.ExecuteReader())
                         {
+                            bool hasOutput = false;
                             while (reader.Read())
                             {
                                 string tableName = reader.GetString(0);
-                                ShowDataFromTableWithinTimePeriod(tableName, activeUser.GetUsername(), cutoff);
+                                ShowDataFromTableWithinTimePeriod(tableName, activeUser.GetUsername(), cutoff, hasOutput);
+                            }
+                            if (!hasOutput)
+                            {
+                                Console.WriteLine("No data found for this user.\n");
                             }
                         }
                     }
@@ -338,7 +343,7 @@ namespace Project
         }
 
         // Displays data from a specific table within a specified time period for the user
-        private void ShowDataFromTableWithinTimePeriod(string tableName, string username, DateTime cutoff)
+        private void ShowDataFromTableWithinTimePeriod(string tableName, string username, DateTime cutoff, bool hasoutput)
         {
             // Skip the sqlite_sequence table
             if (tableName == "sqlite_sequence")
@@ -404,8 +409,12 @@ namespace Project
                     }
                 }
             }
-
-            Console.WriteLine($"Total time for {tableName}: {TimeSpanDiff(DateTime.Now, DateTime.Now - totalSpan)}");
+            string x = TimeSpanDiff(DateTime.Now, DateTime.Now - totalSpan);
+            if (!string.IsNullOrEmpty(x))
+            {
+                Console.WriteLine($"Total time for {tableName}: {TimeSpanDiff(DateTime.Now, DateTime.Now - totalSpan)}");
+                hasoutput = true;
+            }
         }
 
         // Calculates the difference between two DateTime objects and formats it as a string
