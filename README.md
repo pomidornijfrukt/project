@@ -60,10 +60,6 @@ The project consists of two main parts:
 - `DataDBTests.cs`: Contains unit tests for the methods in `DataDB.cs`.
 - `UsersDBTests.cs`: Contains unit tests for the methods in `UsersDB.cs`.
 
-### Project.Tests
-- `DataDBTests.cs`: Contains unit tests for the methods in DataDB.cs.
-- `UsersDBTests.cs`: Contains unit tests for the methods in UsersDB.cs.
-
 ## Dependencies
 
 ## Project
