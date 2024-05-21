@@ -5,11 +5,11 @@ This is a .NET project that includes a data management system using SQLite. It p
 ## Table of Contents
 
 - [Installation](#installation)
+- [Adding Packages](#adding-packages)
 - [Usage](#usage)
 - [Running Tests](#running-tests)
 - [Project Structure](#project-structure)
 - [Dependencies](#dependencies)
-- [Adding Packages](#adding-packages)
 
 ## Installation
 
@@ -25,6 +25,23 @@ This is a .NET project that includes a data management system using SQLite. It p
     ```sh
     dotnet restore
     ```
+
+## Adding Packages
+To add the required NuGet packages, you can run the following commands in your console:
+
+For the main project:
+```sh
+dotnet add Project package Microsoft.Data.SQLite --version 8.0.4
+dotnet add Project package System.Data.SQLite --version 1.0.118
+```
+
+For the test in the project:
+```sh
+dotnet add Project.Tests package Microsoft.NET.Test.Sdk --version 17.6.0
+dotnet add Project.Tests package xunit --version 2.4.1
+dotnet add Project.Tests package xunit.runner.visualstudio --version 2.4.3
+dotnet add Project.Tests package Moq --version 4.16.1
+```
 
 ## Usage
 
@@ -75,20 +92,3 @@ The `Project.Tests` depends on the following NuGet packages:
 - `xunit` (Version 2.4.1)
 - `xunit.runner.visualstudio` (Version 2.4.3)
 - `Moq` (Version 4.16.1)
-
-## Adding Packages
-To add the required NuGet packages, you can run the following commands in your console:
-
-For the main project:
-```sh
-dotnet add Project package Microsoft.Data.SQLite --version 8.0.4
-dotnet add Project package System.Data.SQLite --version 1.0.118
-```
-
-For the test in the project:
-```sh
-dotnet add Project.Tests package Microsoft.NET.Test.Sdk --version 17.6.0
-dotnet add Project.Tests package xunit --version 2.4.1
-dotnet add Project.Tests package xunit.runner.visualstudio --version 2.4.3
-dotnet add Project.Tests package Moq --version 4.16.1
-```
